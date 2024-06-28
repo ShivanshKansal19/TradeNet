@@ -20,7 +20,7 @@
 
 <nav>
   <ul>
-    <li><a href="">Home</a></li>
+    <li><a href={% url 'home' %}>Home</a></li>
   </ul>
   <form id="search-form" action="{% url 'searched' %}" method="GET">
     <input type="text" name="search" id="search" placeholder="Search..." />
