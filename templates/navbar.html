@@ -1,0 +1,32 @@
+<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+<script>
+  $(function () {
+    $("#search").autocomplete({
+      source: "{% url 'search_autocomplete' %}",
+      select: function (event, ui) {
+        var selectedOption = ui.item.label;
+        var searchUrl =
+          "{% url 'searched' %}" +
+          "?search=" +
+          selectedOption +
+          "&search-type=" +
+          $("#search-type").val();
+        window.location.href = searchUrl;
+      },
+    });
+  });
+</script>
+
+<nav>
+  <ul>
+    <li><a href="">Home</a></li>
+  </ul>
+  <form id="search-form" action="{% url 'searched' %}" method="GET">
+    <input type="text" name="search" id="search" placeholder="Search..." />
+    <select name="search-type" id="search-type">
+      <option value="stock">Stock</option>
+      <option value="option">Option</option>
+    </select>
+  </form>
+</nav>
