@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from .models import Stock
+# from .models import Stock
 from django.http import JsonResponse
 import pandas as pd
 import re
@@ -56,7 +56,7 @@ def search_autocomplete(request):
 def searched(request):
     if request.method == "GET":
         search_type = request.GET.get('search-type')
-        searched = request.GET.get('search')
+        searched = request.GET.get('search').upper()
         if searched:
             if search_type == "stock":
                 stock_data = get_historical_stock_data(searched+".NS")

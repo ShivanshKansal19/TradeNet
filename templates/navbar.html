@@ -1,5 +1,5 @@
-<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
-<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
 <script>
   $(function () {
     $("#search").autocomplete({
@@ -18,7 +18,7 @@
   });
 </script>
 
-<nav>
+<div class="container-fluid">
   <ul>
     <li><a href={% url 'home' %}>Home</a></li>
   </ul>
@@ -29,4 +29,4 @@
       <option value="option">Option</option>
     </select>
   </form>
-</nav>
+</div>
