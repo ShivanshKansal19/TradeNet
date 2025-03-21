@@ -21,3 +21,15 @@ class Option(models.Model):
 
     def __str__(self):
         return self.symbol
+
+
+class TrendingStock(models.Model):
+    ticker = models.CharField(max_length=10)
+    name = models.CharField(max_length=100)
+    price = models.FloatField()
+    change = models.FloatField()
+    volume = models.BigIntegerField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.ticker

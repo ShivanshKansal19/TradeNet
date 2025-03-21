@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'baseapp.apps.BaseappConfig',
     'rest_framework',
+    'django_cron',
 ]
 
 MIDDLEWARE = [
@@ -70,6 +71,11 @@ TEMPLATES = [
         },
     },
 ]
+
+CRON_CLASSES = [
+    "baseapp.cron.UpdateTrendingStocks",
+]
+
 
 WSGI_APPLICATION = 'Trading.wsgi.application'
 
