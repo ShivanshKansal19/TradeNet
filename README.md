@@ -1,2 +1,2 @@
 Stock Prediction Website 
-Using - Django, Machine learnig
+Using - Django, Machine learning
