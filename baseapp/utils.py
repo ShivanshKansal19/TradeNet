@@ -1,5 +1,6 @@
 import requests
 import yfinance as yf
+from datetime import datetime
 
 
 def get_trending_stocks():
@@ -13,15 +14,20 @@ def get_trending_stocks():
 
     for item in data["finance"]["result"][0]["quotes"]:
         tk = item["symbol"]
-        ticker = yf.Ticker(tk)
-        stock = ticker.info
+        print(tk)
+        try:
+            ticker = yf.Ticker(tk)
+            stock = ticker.info
+        except Exception as e:
+            print(e)
+            continue
         result.append({
             "ticker": stock['symbol'],
-            "name": stock['longName'],
+            "name": stock['longName'] if 'longName' in stock else stock['shortName'],
             "price": stock['regularMarketPrice'],
             "change": stock['regularMarketChangePercent'],
             "volume": stock['regularMarketVolume'],
-            "timestamp": stock['regularMarketTime'],
+            "timestamp": datetime.fromtimestamp(stock['regularMarketTime']),
         })
     return result
 

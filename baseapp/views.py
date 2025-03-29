@@ -11,11 +11,13 @@ from dash.dependencies import Input, Output
 from django_plotly_dash import DjangoDash
 from .models import TrendingStock
 from .utils import get_historical_stock_data, calculate_moving_average, get_stock_data
+from .utils import get_trending_stocks
+
 # Create your views here.
 
 
 def home(request):
-    stocks = TrendingStock.objects.all()
+    stocks = get_trending_stocks()
     return render(request, 'home.html', {'stocks': stocks})
 
 
