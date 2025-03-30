@@ -12,6 +12,7 @@ from django_plotly_dash import DjangoDash
 from .models import TrendingStock
 from .utils import get_historical_stock_data, calculate_moving_average, get_stock_data
 from .utils import get_trending_stocks
+from prophet import Prophet
 
 # Create your views here.
 
@@ -43,6 +44,7 @@ def searched(request):
                 # Prepare data for the candlestick chart
                 stock_df = pd.DataFrame.from_dict(stock_data)
                 stock_df = stock_df.transpose()
+                stock_df['Date'] = stock_df.index
 
                 # Resample the daily data to weekly data
                 stock_df_weekly = stock_df.resample('W').agg({
@@ -52,6 +54,18 @@ def searched(request):
                     'Close': 'last',
                     'Volume': 'sum'
                 })
+
+                # AI training data
+                train_df = stock_df[['Date', 'Close']]
+                train_df = train_df.rename(
+                    columns={'Date': 'ds', 'Close': 'y'})
+                train_df['ds'] = train_df['ds'].apply(
+                    lambda x: x.replace(tzinfo=None))
+                m = Prophet()
+                m.fit(train_df)
+                future = m.make_future_dataframe(periods=365)
+                forecast = m.predict(future)
+                print(forecast[['ds', 'yhat']].tail(10))
 
                 # Calculate 50-day moving averages for both daily and weekly data
                 moving_avg_daily_21 = calculate_moving_average(
@@ -136,6 +150,22 @@ def searched(request):
                                                         marker_color='orange',
                                                         visible=False)
                 fig.add_trace(weekly_moving_avg_trace_50, row=1, col=1)
+
+                # Forecast trace
+                forecast_trace = go.Scatter(x=forecast['ds'],
+                                            y=forecast['yhat'],
+                                            name='Prediction',
+                                            mode='lines',
+                                            marker_color='pink')
+                fig.add_trace(forecast_trace, row=1, col=1)
+
+                forecast_trace = go.Scatter(x=forecast['ds'],
+                                            y=forecast['yhat'],
+                                            name='Prediction',
+                                            mode='lines',
+                                            marker_color='pink',
+                                            visible=False)
+                fig.add_trace(forecast_trace, row=1, col=1)
 
                 # Customize the chart layout for both daily and weekly charts
                 # candlestick_layout = go.Layout(
