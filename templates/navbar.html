@@ -9,9 +9,7 @@
         var searchUrl =
           "{% url 'searched' %}" +
           "?search=" +
-          selectedOption +
-          "&search-type=" +
-          $("#search-type").val();
+          selectedOption;
         window.location.href = searchUrl;
       },
     });
