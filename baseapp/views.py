@@ -3,14 +3,9 @@ from django.shortcuts import render
 from django.http import JsonResponse
 import pandas as pd
 import re
-import yfinance as yf
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from dash import Dash, dcc, html
-from dash.dependencies import Input, Output
-from django_plotly_dash import DjangoDash
-from .models import TrendingStock
-from .utils import get_historical_stock_data, calculate_moving_average, get_stock_data
+from .utils import get_historical_stock_data, calculate_moving_average
 from .utils import get_trending_stocks
 from prophet import Prophet
 
@@ -65,7 +60,6 @@ def searched(request):
                 m.fit(train_df)
                 future = m.make_future_dataframe(periods=365)
                 forecast = m.predict(future)
-                print(forecast[['ds', 'yhat']].tail(10))
 
                 # Calculate 50-day moving averages for both daily and weekly data
                 moving_avg_daily_21 = calculate_moving_average(

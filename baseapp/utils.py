@@ -4,7 +4,6 @@ from datetime import datetime
 
 
 def get_trending_stocks():
-    print("Fetching trending stocks.")
     url = "https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved?scrIds=most_actives_in&start=0&count=25"
     headers = {"User-Agent": "Mozilla/5.0"}
 
