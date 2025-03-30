@@ -5,7 +5,7 @@ from datetime import datetime
 
 def get_trending_stocks():
     print("Fetching trending stocks.")
-    url = "https://query1.finance.yahoo.com/v1/finance/trending/US"
+    url = "https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved?scrIds=most_actives_in&start=0&count=25"
     headers = {"User-Agent": "Mozilla/5.0"}
 
     response = requests.get(url, headers=headers)
@@ -14,18 +14,18 @@ def get_trending_stocks():
 
     for item in data["finance"]["result"][0]["quotes"]:
         tk = item["symbol"]
-        print(tk)
+        if '.BO' in tk:
+            continue
         try:
             ticker = yf.Ticker(tk)
             stock = ticker.info
         except Exception as e:
-            print(e)
             continue
         result.append({
-            "ticker": stock['symbol'],
-            "name": stock['longName'] if 'longName' in stock else stock['shortName'],
+            "ticker": stock['symbol'].replace('.NS', ''),
+            "name": stock['longName'] if 'lonName' in stock else stock['shortName'] if 'shortName' in stock else 'Not Available',
             "price": stock['regularMarketPrice'],
-            "change": stock['regularMarketChangePercent'],
+            "change": str(stock['regularMarketChangePercent']) if stock['regularMarketChangePercent'] < 0 else '+'+str(stock['regularMarketChangePercent']),
             "volume": stock['regularMarketVolume'],
             "timestamp": datetime.fromtimestamp(stock['regularMarketTime']),
         })
