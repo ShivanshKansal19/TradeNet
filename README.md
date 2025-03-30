@@ -1,7 +1,5 @@
 # TradeNet - AI-Powered Stock Prediction
 
-[![Deployment Status](https://img.shields.io/badge/Deployed-Live-brightgreen)](https://tradenet.onrender.com)
-
 ## 🌐 Live Website
 
 [TradeNet - AI Stock Predictions](https://tradenet.onrender.com)
