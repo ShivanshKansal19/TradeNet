@@ -35,7 +35,7 @@ def searched(request):
         searched = request.GET.get('search').upper()
         if searched:
             stock_data = get_historical_stock_data(searched+".NS")
-            if stock_data:
+            if not isinstance(stock_data, Exception) and stock_data:
                 # Prepare data for the candlestick chart
                 stock_df = pd.DataFrame.from_dict(stock_data)
                 stock_df = stock_df.transpose()
@@ -230,6 +230,5 @@ def searched(request):
                     'candlestick_data': chart_data
                 })
             else:
-                return JsonResponse({"error": "Error fetching stock data"}, status=500)
-        return render(request, 'searched.html')
+                return JsonResponse({"error": str(stock_data)}, status=500)
     return render(request, 'searched.html')
