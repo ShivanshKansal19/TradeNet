@@ -3,6 +3,23 @@ from yfinance import EquityQuery, shared
 import time
 import pandas as pd
 from django.http import Http404
+from .models import Sector
+
+
+def fetch_sectors_data():
+    sectors = Sector.objects.all()
+    sectors_data = [{"name": "All Sectors",
+                     "market_weight": "100%", "market_cap": "--"}]
+
+    for sector in sectors:
+        sector_data = yf.Sector(sector.sector_name)
+        sectors_data.append({
+            "name": sector_data.name,
+            "market_weight": f"{round(sector_data.overview['market_weight']*100,2)}%",
+            "market_cap": sector_data.overview['market_cap'],
+        })
+
+    return sectors_data
 
 
 def get_trending_stocks():

@@ -6,7 +6,7 @@ import re
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from .utils import get_historical_stock_data, calculate_moving_average
-from .utils import get_trending_stocks
+from .utils import get_trending_stocks, fetch_sectors_data
 from prophet import Prophet
 from django.views.decorators.cache import cache_page
 import time
@@ -16,14 +16,11 @@ from .models import Stock, Sector
 # Create your views here.
 
 
-@cache_page(60 * 10)
+# @cache_page(60 * 10)
 def home(request):
-    start_time = time.time()
+    sectors = fetch_sectors_data()
     stocks = get_trending_stocks()
-    end_time = time.time()
-    print(
-        f"Time taken to fetch trending stocks: {end_time - start_time} seconds")
-    return render(request, 'home.html', {'stocks': stocks})
+    return render(request, 'home.html', {'stocks': stocks, 'sectors': sectors})
 
 
 def search_autocomplete(request):
