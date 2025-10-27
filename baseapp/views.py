@@ -16,7 +16,7 @@ from .models import Stock, Sector
 # Create your views here.
 
 
-# @cache_page(60 * 10)
+@cache_page(60 * 10)
 def home(request):
     start_time = time.time()
     stocks = get_trending_stocks()

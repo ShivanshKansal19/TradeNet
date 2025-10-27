@@ -41,12 +41,7 @@ INSTALLED_APPS = [
     'baseapp.apps.BaseappConfig',
     'rest_framework',
     'django_cron',
-    'tailwind',
 ]
-
-TAILWIND_APP_NAME = 'theme'
-INTERNAL_IPS = ['127.0.0.1']
-NPM_BIN_PATH = 'C:/Program Files/nodejs/npm.cmd'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -143,15 +138,6 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static'
 ]
-
-if DEBUG:
-    # Add django_browser_reload only in DEBUG mode
-    INSTALLED_APPS += ['django_browser_reload']
-
-    # Add django_browser_reload middleware only in DEBUG mode
-    MIDDLEWARE += [
-        "django_browser_reload.middleware.BrowserReloadMiddleware",
-    ]
 
 
 # Default primary key field type
