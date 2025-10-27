@@ -4,32 +4,18 @@ from django.db import models
 
 
 class Stock(models.Model):
-    symbol = models.CharField(max_length=10)
+    symbol = models.CharField(max_length=100)
     name = models.CharField(max_length=100)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    series = models.CharField(max_length=100)
+    date_of_listing = models.DateField()
+    isin_number = models.CharField(max_length=12, primary_key=True)
 
     def __str__(self):
         return self.symbol
 
 
-class Option(models.Model):
-    symbol = models.CharField(max_length=10)
-    name = models.CharField(max_length=100)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    expiration_date = models.DateField()
-    # Add any other fields as needed
+class Sector(models.Model):
+    sector_name = models.CharField(max_length=100)
 
     def __str__(self):
-        return self.symbol
-
-
-class TrendingStock(models.Model):
-    ticker = models.CharField(max_length=10)
-    name = models.CharField(max_length=100)
-    price = models.FloatField()
-    change = models.FloatField()
-    volume = models.BigIntegerField()
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.ticker
+        return self.sector_name

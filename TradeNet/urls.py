@@ -23,5 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('baseapp.urls')),
     path('favicon.ico', RedirectView.as_view(
-        url=staticfiles_storage.url('favicon/favicon.ico'))),
+        url=staticfiles_storage.url('img/favicon.ico'))),
+    path("__reload__/", include("django_browser_reload.urls")),
 ]
