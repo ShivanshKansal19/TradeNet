@@ -27,7 +27,8 @@ else:
     SECRET_KEY = 'django-insecure-$xpgdyqt_a5^o6vl((-mj*4+ljcyys$+cv!r9v+oz%0flu#g7a'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = False if os.getenv(
+    'DJANGO_ENV', 'development') == 'production' else True
 
 ALLOWED_HOSTS = ['tradenet.onrender.com', 'localhost', '127.0.0.1']
 
