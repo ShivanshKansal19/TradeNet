@@ -24,9 +24,9 @@ def fetch_sectors_data():
 
 def get_trending_stocks():
     q = EquityQuery('and', [
-        EquityQuery('eq', ['region', 'in']),
-        EquityQuery('gte', ['intradaymarketcap', 2000000000]),
-        EquityQuery('gt', ['dayvolume', 5000000])
+        EquityQuery('eq', ['region', 'in']),  # type: ignore
+        EquityQuery('gte', ['intradaymarketcap', 2000000000]),  # type: ignore
+        EquityQuery('gt', ['dayvolume', 5000000])  # type: ignore
     ])
 
     result = []
