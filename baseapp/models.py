@@ -4,7 +4,7 @@ from django.db import models
 
 
 class Stock(models.Model):
-    symbol = models.CharField(max_length=100)
+    symbol = models.CharField(max_length=100, db_index=True)
     name = models.CharField(max_length=100)
     series = models.CharField(max_length=100)
     date_of_listing = models.DateField()

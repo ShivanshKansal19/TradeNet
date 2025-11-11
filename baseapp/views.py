@@ -2,13 +2,13 @@ from django.shortcuts import render
 # from .models import Stock
 from django.http import JsonResponse
 import pandas as pd
-import re
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from .utils import get_historical_stock_data, calculate_moving_average
 from .utils import get_trending_stocks, fetch_sectors_data
 from prophet import Prophet
 from django.views.decorators.cache import cache_page
+from django.core.cache import cache
 import time
 from datetime import datetime
 from .models import Stock, Sector
@@ -26,12 +26,11 @@ def home(request):
 def search_autocomplete(request):
     if 'term' in request.GET:
         query = request.GET.get('term')
-        symbols_list = Stock.objects.values_list('symbol', flat=True)
-        filtered_symbols_list = []
-        for symbol in symbols_list:
-            if bool(re.match(query, symbol, re.I)):
-                filtered_symbols_list.append(symbol)
-        return JsonResponse(filtered_symbols_list[:10], safe=False)
+        # Use database query instead of Python loop for better performance
+        filtered_symbols = Stock.objects.filter(
+            symbol__istartswith=query
+        ).values_list('symbol', flat=True)[:10]
+        return JsonResponse(list(filtered_symbols), safe=False)
     return JsonResponse([], safe=False)
 
 
@@ -66,16 +65,22 @@ def searched(request):
             'Volume': 'sum'
         })
 
-        # AI training data
-        train_df = stock_df[['Date', 'Close']]
-        train_df = train_df.rename(
-            columns={'Date': 'ds', 'Close': 'y'})
-        train_df['ds'] = train_df['ds'].apply(
-            lambda x: x.replace(tzinfo=None))
-        m = Prophet()
-        m.fit(train_df)
-        future = m.make_future_dataframe(periods=365)
-        forecast = m.predict(future)
+        # AI training data - check cache first to avoid retraining
+        cache_key = f'prophet_forecast_{searched}'
+        forecast = cache.get(cache_key)
+        
+        if forecast is None:
+            train_df = stock_df[['Date', 'Close']]
+            train_df = train_df.rename(
+                columns={'Date': 'ds', 'Close': 'y'})
+            train_df['ds'] = train_df['ds'].apply(
+                lambda x: x.replace(tzinfo=None))
+            m = Prophet()
+            m.fit(train_df)
+            future = m.make_future_dataframe(periods=365)
+            forecast = m.predict(future)
+            # Cache for 24 hours
+            cache.set(cache_key, forecast, 60 * 60 * 24)
 
         # Calculate 50-day moving averages for both daily and weekly data
         moving_avg_daily_21 = calculate_moving_average(

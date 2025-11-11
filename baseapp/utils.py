@@ -12,12 +12,17 @@ def fetch_sectors_data():
                      "market_weight": "100%", "market_cap": "--"}]
 
     for sector in sectors:
-        sector_data = yf.Sector(sector.sector_name)
-        sectors_data.append({
-            "name": sector_data.name,
-            "market_weight": f"{round(sector_data.overview['market_weight']*100,2)}%",
-            "market_cap": sector_data.overview['market_cap'],
-        })
+        try:
+            sector_data = yf.Sector(sector.sector_name)
+            overview = sector_data.overview
+            sectors_data.append({
+                "name": sector_data.name,
+                "market_weight": f"{round(overview['market_weight']*100, 2)}%",
+                "market_cap": overview['market_cap'],
+            })
+        except Exception as e:
+            print(f"Error fetching sector data for {sector.sector_name}: {e}")
+            continue
 
     return sectors_data
 
@@ -40,11 +45,13 @@ def get_trending_stocks():
     for stock in stock_list:
         if '.BO' in stock['symbol']:
             continue
+        change_percent = stock['regularMarketChangePercent']
+        change_str = str(change_percent) if change_percent < 0 else f'+{change_percent}'
         result.append({
             "ticker": stock['symbol'].replace('.NS', ''),
             "name": stock['longName'] if 'longName' in stock else stock['shortName'] if 'shortName' in stock else 'Not Available',
             "price": stock['regularMarketPrice'],
-            "change": str(stock['regularMarketChangePercent']) if stock['regularMarketChangePercent'] < 0 else '+'+str(stock['regularMarketChangePercent']),
+            "change": change_str,
             "volume": stock['regularMarketVolume'],
             "timestamp": stock['regularMarketTime'],
         })
