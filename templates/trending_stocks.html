@@ -18,7 +18,11 @@
                 </td>
                 <td>{{ stock.name }}</td>
                 <td>{{ stock.price }}</td>
-                <td>{{ stock.change }}</td>
+                {% if stock.change.0 == '-' %}
+                    <td class="text-danger">{{ stock.change }}</td>
+                {% else %}
+                    <td class="text-success">{{ stock.change }}</td>
+                {% endif %}
                 <td>{{ stock.volume }}</td>
                 <td>{{ stock.timestamp }}</td>
             </tr>

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load my_filters %}
+{% block content %}
+    <h1>{{ industry.name }}</h1>
+    <p>{{ industry.overview.description }}</p>
+    <table class="table table-hover">
+        <thead>
+            <tr class="table-dark">
+                <th scope="col">Market Cap</th>
+                <th scope="col">Industry Weight</th>
+                <th scope="col">Companies</th>
+                <th scope="col">Employees</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="table-light">
+                <td>{{ industry.overview.market_cap|humanize }}</td>
+                <td>{{ industry.overview.market_weight|format_percentage }}</td>
+                <td>{{ industry.overview.companies_count }}</td>
+                <td>{{ industry.overview.employee_count|humanize }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <h1>Top Companies</h1>
+    <table class="table table-hover">
+        <thead>
+            <tr class="table-dark">
+                <th scope="col">Company</th>
+                <th scope="col">Market Weight</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for company in industry.top_companies %}
+                <tr class="table-light">
+                    <td>
+                        <a href="#">{{ company.name }}</a>
+                    </td>
+                    <td>{{ company|get_item:"market weight"|format_percentage }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock content %}

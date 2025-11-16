@@ -25,20 +25,20 @@ def format_percentage(input):
     return f"{round(input*100,2)}%"
 
 
+def format_timestamp(input):
+    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(input))
+
+
 def fetch_sectors_data():
     sectors = Sector.objects.all()
-    sectors_data = [{"name": "All Sectors",
-                     "dashed_name": "all-sectors",
-                     "market_weight": "100%",
-                     "market_cap": "--"}]
-
+    sectors_data = []
     for sector in sectors:
         sector_data = yf.Sector(sector.sector_name)
         sectors_data.append({
+            "key": sector_data.key,
             "name": sector_data.name,
-            "dashed_name": sector_data.name.replace(" ", "-").lower(),
-            "market_weight": f"{round(sector_data.overview['market_weight']*100,2)}%",
-            "market_cap": sector_data.overview['market_cap'],
+            "market_weight": format_percentage(sector_data.overview['market_weight']),
+            "market_cap": format_value(sector_data.overview['market_cap']),
         })
 
     return sectors_data
@@ -69,9 +69,9 @@ def get_trending_stocks():
             "ticker": stock['symbol'].replace('.NS', ''),
             "name": stock['longName'] if 'longName' in stock else stock['shortName'] if 'shortName' in stock else 'Not Available',
             "price": stock['regularMarketPrice'],
-            "change": str(stock['regularMarketChangePercent']) if stock['regularMarketChangePercent'] < 0 else '+'+str(stock['regularMarketChangePercent']),
-            "volume": stock['regularMarketVolume'],
-            "timestamp": stock['regularMarketTime'],
+            "change": ('' if stock['regularMarketChangePercent'] < 0 else '+')+str(stock['regularMarketChangePercent']),
+            "volume": format_value(stock['regularMarketVolume']),
+            "timestamp": format_timestamp(stock['regularMarketTime']),
         })
 
     return result

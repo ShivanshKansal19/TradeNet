@@ -32,13 +32,14 @@
             {% for industry in sector.industries %}
                 <tr class="table-light">
                     <td>
-                        <a href="#">{{ industry.name }}</a>
+                        <a href="{% url 'industry' industry.key %}">{{ industry.name }}</a>
                     </td>
                     <td>{{ industry|get_item:"market weight"|format_percentage }}</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
+    <h1>Top Companies</h1>
     <table class="table table-hover">
         <thead>
             <tr class="table-dark">

@@ -8,10 +8,17 @@
         </tr>
     </thead>
     <tbody>
+        <tr class="table-light">
+            <td>
+                <a href={% url "sectors" %}>All Sectors</a>
+            </td>
+            <td>100.0%</td>
+            <td>--</td>
+        </tr>
         {% for sector in sectors %}
             <tr class="table-light">
                 <td>
-                    <a href={% url "sector" sector.dashed_name %}>{{ sector.name }}</a>
+                    <a href={% url "sector" sector.key %}>{{ sector.name }}</a>
                 </td>
                 <td>{{ sector.market_weight }}</td>
                 <td>{{ sector.market_cap }}</td>

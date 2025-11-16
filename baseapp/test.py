@@ -10,5 +10,8 @@ import os
 import django
 from django.conf import settings
 
-sector = yf.Sector('financial-services')
-print(sector.overview)
+# sector = yf.Sector('technology')
+# print(sector.key)
+
+industry = yf.Industry('semiconductors')
+print(industry.top_companies)

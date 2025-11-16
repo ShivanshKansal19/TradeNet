@@ -24,22 +24,43 @@ def home(request):
     return render(request, 'home.html', {'stocks': stocks, 'sectors': sectors})
 
 
+def sectors(request):
+    sectors = fetch_sectors_data()
+    return render(request, 'sectors_page.html', {'sectors': sectors})
+
+
 def sector(request, name):
     sector_data = yf.Sector(name)
     overview = sector_data.overview
-    industries = sector_data.industries.to_dict(orient='records')
+    industries = sector_data.industries.reset_index().to_dict(orient='records')
     top_companies = sector_data.top_companies
     if top_companies is not None:
         top_companies = top_companies.head(10).to_dict(orient='records')
     else:
         top_companies = []
-    sector_data = {
+    sector = {
         "name": sector_data.name,
         "overview": overview,
         "industries": industries,
         "top_companies": top_companies
     }
-    return render(request, 'sector.html', {'sector': sector_data})
+    return render(request, 'sector.html', {'sector': sector})
+
+
+def industry(request, name):
+    industry_data = yf.Industry(name)
+    overview = industry_data.overview
+    top_companies = industry_data.top_companies
+    if top_companies is not None:
+        top_companies = top_companies.reset_index().head(10).to_dict(orient='records')
+    else:
+        top_companies = []
+    industry = {
+        "name": industry_data.name,
+        "overview": overview,
+        "top_companies": top_companies
+    }
+    return render(request, 'industry.html', {'industry': industry})
 
 
 def search_autocomplete(request):
