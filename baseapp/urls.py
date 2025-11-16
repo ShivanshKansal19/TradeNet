@@ -6,4 +6,5 @@ urlpatterns = [
     path('search_autocomplete/', views.search_autocomplete,
          name='search_autocomplete'),
     path('searched/', views.searched, name='searched'),
+    path('sector/<str:name>/', views.sector, name='sector'),
 ]

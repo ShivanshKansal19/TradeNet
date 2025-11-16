@@ -11,7 +11,7 @@
         {% for sector in sectors %}
             <tr class="table-light">
                 <td>
-                    <a href="#">{{ sector.name }}</a>
+                    <a href={% url "sector" sector.dashed_name %}>{{ sector.name }}</a>
                 </td>
                 <td>{{ sector.market_weight }}</td>
                 <td>{{ sector.market_cap }}</td>

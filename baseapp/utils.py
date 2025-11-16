@@ -6,20 +6,45 @@ from django.http import Http404
 from .models import Sector
 
 
+def format_value(input):
+    keys = ['K', 'M', 'B', 'T']
+
+    count = 0
+    divised = input
+
+    for _ in range(0, len(keys)):
+        divised = divised / 1000
+        count = count + 1
+        if divised < 1000:
+            break
+
+    return "%s%s" % (round(divised, 2), keys[count - 1])
+
+
+def format_percentage(input):
+    return f"{round(input*100,2)}%"
+
+
 def fetch_sectors_data():
     sectors = Sector.objects.all()
     sectors_data = [{"name": "All Sectors",
-                     "market_weight": "100%", "market_cap": "--"}]
+                     "dashed_name": "all-sectors",
+                     "market_weight": "100%",
+                     "market_cap": "--"}]
 
     for sector in sectors:
         sector_data = yf.Sector(sector.sector_name)
         sectors_data.append({
             "name": sector_data.name,
+            "dashed_name": sector_data.name.replace(" ", "-").lower(),
             "market_weight": f"{round(sector_data.overview['market_weight']*100,2)}%",
             "market_cap": sector_data.overview['market_cap'],
         })
 
     return sectors_data
+
+
+# def fetch_
 
 
 def get_trending_stocks():

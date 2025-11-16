@@ -6,21 +6,40 @@ import re
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from .utils import get_historical_stock_data, calculate_moving_average
-from .utils import get_trending_stocks, fetch_sectors_data
+from .utils import get_trending_stocks, fetch_sectors_data, format_value
 from prophet import Prophet
 from django.views.decorators.cache import cache_page
 import time
 from datetime import datetime
-from .models import Stock, Sector
+from .models import Stock
+import yfinance as yf
 
 # Create your views here.
 
 
-@cache_page(60 * 10)
+# @cache_page(60 * 10)
 def home(request):
     sectors = fetch_sectors_data()
     stocks = get_trending_stocks()
     return render(request, 'home.html', {'stocks': stocks, 'sectors': sectors})
+
+
+def sector(request, name):
+    sector_data = yf.Sector(name)
+    overview = sector_data.overview
+    industries = sector_data.industries.to_dict(orient='records')
+    top_companies = sector_data.top_companies
+    if top_companies is not None:
+        top_companies = top_companies.head(10).to_dict(orient='records')
+    else:
+        top_companies = []
+    sector_data = {
+        "name": sector_data.name,
+        "overview": overview,
+        "industries": industries,
+        "top_companies": top_companies
+    }
+    return render(request, 'sector.html', {'sector': sector_data})
 
 
 def search_autocomplete(request):

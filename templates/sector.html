@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load my_filters %}
+{% block content %}
+    <h1>{{ sector.name }}</h1>
+    <p>{{ sector.overview.description }}</p>
+    <table class="table table-hover">
+        <thead>
+            <tr class="table-dark">
+                <th scope="col">Market Cap</th>
+                <th scope="col">Market Weight</th>
+                <th scope="col">Industries</th>
+                <th scope="col">Companies</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="table-light">
+                <td>{{ sector.overview.market_cap|humanize }}</td>
+                <td>{{ sector.overview.market_weight|format_percentage }}</td>
+                <td>{{ sector.overview.industries_count }}</td>
+                <td>{{ sector.overview.companies_count }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-hover">
+        <thead>
+            <tr class="table-dark">
+                <th scope="col">Industry</th>
+                <th scope="col">Market Weight</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for industry in sector.industries %}
+                <tr class="table-light">
+                    <td>
+                        <a href="#">{{ industry.name }}</a>
+                    </td>
+                    <td>{{ industry|get_item:"market weight"|format_percentage }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <table class="table table-hover">
+        <thead>
+            <tr class="table-dark">
+                <th scope="col">Company</th>
+                <th scope="col">Market Weight</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for company in sector.top_companies %}
+                <tr class="table-light">
+                    <td>
+                        <a href="#">{{ company.name }}</a>
+                    </td>
+                    <td>{{ company|get_item:"market weight"|format_percentage }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock content %}
