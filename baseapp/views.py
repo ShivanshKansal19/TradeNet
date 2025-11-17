@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 # from .models import Stock
 from django.http import JsonResponse
 import pandas as pd
@@ -6,7 +6,7 @@ import re
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from .utils import get_historical_stock_data, calculate_moving_average
-from .utils import get_trending_stocks, fetch_sectors_data, format_value
+from .utils import get_trending_stocks, fetch_sectors_data, fetch_industry_top_companies, fetch_sector_top_companies
 from prophet import Prophet
 from django.views.decorators.cache import cache_page
 import time
@@ -17,28 +17,28 @@ import yfinance as yf
 # Create your views here.
 
 
-# @cache_page(60 * 10)
+@cache_page(60 * 60 * 24)
 def home(request):
     sectors = fetch_sectors_data()
     stocks = get_trending_stocks()
     return render(request, 'home.html', {'stocks': stocks, 'sectors': sectors})
 
 
+@cache_page(60 * 60 * 24)
 def sectors(request):
     sectors = fetch_sectors_data()
     return render(request, 'sectors_page.html', {'sectors': sectors})
 
 
+@cache_page(60 * 60 * 24)
 def sector(request, name):
     sector_data = yf.Sector(name)
     overview = sector_data.overview
     industries = sector_data.industries.reset_index().to_dict(orient='records')
-    top_companies = sector_data.top_companies
-    if top_companies is not None:
-        top_companies = top_companies.head(10).to_dict(orient='records')
-    else:
-        top_companies = []
+    top_companies = fetch_sector_top_companies(sector_data.name, 'in')
+    print(top_companies)
     sector = {
+        "key": sector_data.key,
         "name": sector_data.name,
         "overview": overview,
         "industries": industries,
@@ -47,19 +47,21 @@ def sector(request, name):
     return render(request, 'sector.html', {'sector': sector})
 
 
-def industry(request, name):
+@cache_page(60 * 60 * 24)
+def industry(request, sector_name, name):
     industry_data = yf.Industry(name)
     overview = industry_data.overview
-    top_companies = industry_data.top_companies
-    if top_companies is not None:
-        top_companies = top_companies.reset_index().head(10).to_dict(orient='records')
-    else:
-        top_companies = []
+
+    top_companies = fetch_industry_top_companies(
+        industry_data.name.replace(' - ', ' ').replace(' & ', ' '), 'in')
     industry = {
         "name": industry_data.name,
         "overview": overview,
         "top_companies": top_companies
     }
+    print(industry_data.sector_key, sector_name)
+    if sector_name != industry_data.sector_key:
+        return redirect('industry', sector_name=industry_data.sector_key, name=name)
     return render(request, 'industry.html', {'industry': industry})
 
 

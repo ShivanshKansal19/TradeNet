@@ -7,6 +7,8 @@ from .models import Sector
 
 
 def format_value(input):
+    if input is None:
+        return "--"
     keys = ['K', 'M', 'B', 'T']
 
     count = 0
@@ -22,10 +24,14 @@ def format_value(input):
 
 
 def format_percentage(input):
+    if input is None:
+        return "--"
     return f"{round(input*100,2)}%"
 
 
 def format_timestamp(input):
+    if input is None:
+        return "--"
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(input))
 
 
@@ -44,7 +50,36 @@ def fetch_sectors_data():
     return sectors_data
 
 
-# def fetch_
+def fetch_sector_top_companies(sector, region):
+    q = EquityQuery('and', [
+        EquityQuery('is-in', ['sector', sector]),  # type: ignore
+        EquityQuery('eq', ['region', region]),  # type: ignore
+        EquityQuery('gte', ['intradayprice', 5]),  # type: ignore
+    ])
+
+    try:
+        company_list = yf.screen(q, sortField='dayvolume')['quotes']
+    except Exception as e:
+        print(f"Error fetching industry top companies: {e}")
+        return []
+
+    return parse_stock_list(company_list)
+
+
+def fetch_industry_top_companies(industry, region):
+    q = EquityQuery('and', [
+        EquityQuery('is-in', ['industry', industry]),  # type: ignore
+        EquityQuery('eq', ['region', region]),  # type: ignore
+        EquityQuery('gte', ['intradayprice', 5]),  # type: ignore
+    ])
+
+    try:
+        company_list = yf.screen(q, sortField='dayvolume')['quotes']
+    except Exception as e:
+        print(f"Error fetching industry top companies: {e}")
+        return []
+
+    return parse_stock_list(company_list)
 
 
 def get_trending_stocks():
@@ -54,27 +89,13 @@ def get_trending_stocks():
         EquityQuery('gt', ['dayvolume', 5000000])  # type: ignore
     ])
 
-    result = []
-
     try:
         stock_list = yf.screen(q, sortField='dayvolume')['quotes']
     except Exception as e:
         print(f"Error fetching trending stocks: {e}")
         return []
 
-    for stock in stock_list:
-        if '.BO' in stock['symbol']:
-            continue
-        result.append({
-            "ticker": stock['symbol'].replace('.NS', ''),
-            "name": stock['longName'] if 'longName' in stock else stock['shortName'] if 'shortName' in stock else 'Not Available',
-            "price": stock['regularMarketPrice'],
-            "change": ('' if stock['regularMarketChangePercent'] < 0 else '+')+str(stock['regularMarketChangePercent']),
-            "volume": format_value(stock['regularMarketVolume']),
-            "timestamp": format_timestamp(stock['regularMarketTime']),
-        })
-
-    return result
+    return parse_stock_list(stock_list)
 
 
 def get_stock_data(symbol):
@@ -85,6 +106,31 @@ def get_stock_data(symbol):
     except Exception as e:
         print(f"Error fetching stock data for {symbol}: {e}")
         return None
+
+
+def parse_stock_data(stock_info):
+    if not stock_info:
+        return None
+
+    parsed_data = {
+        "ticker": stock_info['symbol'].replace('.NS', ''),
+        "name": stock_info['longName'] if 'longName' in stock_info else stock_info['shortName'] if 'shortName' in stock_info else 'Not Available',
+        "price": stock_info['regularMarketPrice'],
+        "change": ('' if stock_info['regularMarketChangePercent'] < 0 else '+')+str(round(stock_info['regularMarketChangePercent'], 2))+'%',
+        "volume": format_value(stock_info['regularMarketVolume']),
+        "timestamp": format_timestamp(stock_info['regularMarketTime']),
+    }
+
+    return parsed_data
+
+
+def parse_stock_list(stock_list):
+    result = []
+    for stock in stock_list:
+        parsed_stock = parse_stock_data(stock)
+        if parsed_stock:
+            result.append(parsed_stock)
+    return result
 
 
 def get_historical_stock_data(symbol):

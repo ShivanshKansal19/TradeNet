@@ -8,5 +8,6 @@ urlpatterns = [
     path('searched/', views.searched, name='searched'),
     path('sectors', views.sectors, name='sectors'),
     path('sectors/<str:name>/', views.sector, name='sector'),
-    path('industry/<str:name>/', views.industry, name='industry'),
+    path('sectors/<str:sector_name>/<str:name>/',
+         views.industry, name='industry'),
 ]
