@@ -2,7 +2,7 @@
 {% block content %}
   {% if stock %}
     <h1>STOCK</h1>
-    <h2>You Searched for {{ stock }}</h2>
+    <h2>{{ stock }}</h2>
     <!-- Render the Plotly chart here -->
     <div id="plotly_chart" chartToShow="daily"></div>
     <!-- Load the daily candlestick chart data -->
@@ -10,10 +10,7 @@
   var dailyCandlestickData = {{ candlestick_data|safe }};
   Plotly.newPlot('plotly_chart', dailyCandlestickData.data, dailyCandlestickData.layout);
     </script>
-  {% elif option %}
-    <h1>OPTION</h1>
-    <h2>You Searched for {{ option }}</h2>
   {% else %}
-    <h1>Invalid Search</h1>
+    <h1>Invalid Ticker</h1>
   {% endif %}
 {% endblock content %}

@@ -6,6 +6,7 @@ urlpatterns = [
     path('search_autocomplete/', views.search_autocomplete,
          name='search_autocomplete'),
     path('searched/', views.searched, name='searched'),
+    path('stocks/<str:ticker>/', views.stock, name='stock'),
     path('sectors', views.sectors, name='sectors'),
     path('sectors/<str:name>/', views.sector, name='sector'),
     path('sectors/<str:sector_name>/<str:name>/',
