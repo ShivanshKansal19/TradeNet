@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+  {% if stock %}
+    <h1>STOCK</h1>
+    <h2>{{ stock }}</h2>
+    <!-- Render the Plotly chart here -->
+    <div id="plotly_chart" chartToShow="daily"></div>
+    <!-- Load the daily candlestick chart data -->
+    <script>
+  var dailyCandlestickData = {{ candlestick_data|safe }};
+  Plotly.newPlot('plotly_chart', dailyCandlestickData.data, dailyCandlestickData.layout);
+    </script>
+  {% else %}
+    <h1>Invalid Ticker</h1>
+  {% endif %}
+{% endblock content %}
