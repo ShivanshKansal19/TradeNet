@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'baseapp.apps.BaseappConfig',
     'rest_framework',
     'django_cron',
+    'clearcache',
 ]
 
 MIDDLEWARE = [

@@ -11,4 +11,8 @@ urlpatterns = [
     path('sectors/<str:name>/', views.sector, name='sector'),
     path('sectors/<str:sector_name>/<str:name>/',
          views.industry, name='industry'),
+    path('fundamental-analysis/', views.fundamental_analysis,
+         name='fundamental_analysis'),
+    path('technical-analysis/<str:ticker>/', views.technical_analysis,
+         name='technical_analysis'),
 ]
