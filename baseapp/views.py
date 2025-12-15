@@ -24,6 +24,14 @@ def home(request):
     return render(request, 'home.html', {'stocks': stocks, 'sectors': sectors})
 
 
+def fundamental_analysis(request):
+    return render(request, 'fundamental_analysis.html')
+
+
+def technical_analysis(request, ticker):
+    return stock(request, ticker)
+
+
 @cache_page(60 * 60 * 24)
 def sectors(request):
     sectors = fetch_sectors_data()

@@ -11,18 +11,20 @@ import django
 from django.conf import settings
 
 # sector = yf.Sector('technology')
-# print(sector.)
+# print(sector)
+s = yf.Ticker('AAPL')
+print(s.info)
 
 # industry = yf.Industry('semiconductors')
 # print(industry.top_performing_companies)
 
-q = EquityQuery('and', [
-    EquityQuery('is-in', ['sector', 'Technology']),  # type: ignore
-    EquityQuery(
-        'is-in', ['industry', 'Software Infrastructure']),  # type: ignore
-    # EquityQuery('eq', ['region', 'in']),  # type: ignore
-    # EquityQuery('gte', ['intradayprice', 5]),  # type: ignore
-])
+# q = EquityQuery('and', [
+#     EquityQuery('is-in', ['sector', 'Technology']),  # type: ignore
+#     EquityQuery(
+#         'is-in', ['industry', 'Software Infrastructure']),  # type: ignore
+# EquityQuery('eq', ['region', 'in']),  # type: ignore
+# EquityQuery('gte', ['intradayprice', 5]),  # type: ignore
+# ])
 
 # top_companies_query = yf.EquityQuery(
 #     region="US",
@@ -31,4 +33,4 @@ q = EquityQuery('and', [
 # )
 # result = top_companies_query.screen()
 # print(result)
-print(yf.screen(q, sortField='dayvolume')['quotes'])
+# print(yf.screen(q, sortField='dayvolume')['quotes'])
