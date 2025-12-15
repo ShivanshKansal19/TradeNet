@@ -39,7 +39,11 @@ def fetch_sectors_data():
     sectors = Sector.objects.all()
     sectors_data = []
     for sector in sectors:
-        sector_data = yf.Sector(sector.sector_name)
+        try:
+            sector_data = yf.Sector(sector.sector_name)
+        except Exception as e:
+            print(f"Error fetching sector data for {sector.sector_name}: {e}")
+            continue
         sectors_data.append({
             "key": sector_data.key,
             "name": sector_data.name,
