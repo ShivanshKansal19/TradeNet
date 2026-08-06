@@ -2,19 +2,18 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import requests
 import json
-# import yfinance as yf
-# from yfinance import EquityQuery
+import yfinance as yf
+from yfinance import EquityQuery
 import time
-# import nsetools as nse
+import nsetools as nse
 import os
 import django
 from django.conf import settings
-from baseapp.utils import fetch_sectors_data
 
 # sector = yf.Sector('technology')
 # print(sector)
-# s = yf.Ticker('AAPL')
-# print(s.info)
+s = yf.Ticker('AAPL')
+print(s.info)
 
 # industry = yf.Industry('semiconductors')
 # print(industry.top_performing_companies)
@@ -35,5 +34,3 @@ from baseapp.utils import fetch_sectors_data
 # result = top_companies_query.screen()
 # print(result)
 # print(yf.screen(q, sortField='dayvolume')['quotes'])
-data = fetch_sectors_data()
-print(data)

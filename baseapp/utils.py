@@ -2,8 +2,6 @@ import yfinance as yf
 from yfinance import EquityQuery, shared
 import time
 import pandas as pd
-import numpy as np
-from prophet import Prophet
 from django.http import Http404
 from .models import Sector
 
@@ -153,70 +151,3 @@ def get_historical_stock_data(symbol):
 
 def calculate_moving_average(data, window=10):
     return data.rolling(window=window, min_periods=1).mean()
-
-
-def build_price_forecast(close_prices, forecast_days=60, validation_days=60):
-    """Return a forecast only when it improves on a last-price baseline.
-
-    Stock prices are non-stationary, so fitting a trend directly to the price
-    often produces implausible long-range lines.  This routine models log
-    prices, tests the model on the most recent unseen sessions, and falls back
-    to the naive (last close) forecast if Prophet does not add predictive
-    value.
-    """
-    series = pd.Series(close_prices).dropna().astype(float).sort_index()
-    series.index = pd.DatetimeIndex(series.index).tz_localize(None)
-    if len(series) < validation_days + 80:
-        raise ValueError("Not enough historical prices to validate a forecast")
-
-    train = series.iloc[:-validation_days]
-    validation = series.iloc[-validation_days:]
-    training_frame = pd.DataFrame({
-        "ds": train.index,
-        "y": np.log(train.values),
-    })
-
-    model = Prophet(
-        daily_seasonality=False,
-        weekly_seasonality=True,
-        yearly_seasonality=True,
-        changepoint_prior_scale=0.05,
-        interval_width=0.80,
-    )
-    model.fit(training_frame)
-
-    validation_prediction = model.predict(pd.DataFrame({"ds": validation.index}))
-    predicted_prices = np.exp(validation_prediction["yhat"].to_numpy())
-    baseline_prices = np.full(len(validation), train.iloc[-1])
-    model_mae = float(np.mean(np.abs(validation.to_numpy() - predicted_prices)))
-    baseline_mae = float(np.mean(np.abs(validation.to_numpy() - baseline_prices)))
-    use_model = model_mae < baseline_mae
-
-    full_frame = pd.DataFrame({"ds": series.index, "y": np.log(series.values)})
-    model.fit(full_frame)
-    future_dates = pd.bdate_range(series.index[-1] + pd.offsets.BDay(1), periods=forecast_days)
-
-    if use_model:
-        future_prediction = model.predict(pd.DataFrame({"ds": future_dates}))
-        forecast = pd.DataFrame({
-            "ds": future_dates,
-            "yhat": np.exp(future_prediction["yhat"].to_numpy()),
-            "yhat_lower": np.exp(future_prediction["yhat_lower"].to_numpy()),
-            "yhat_upper": np.exp(future_prediction["yhat_upper"].to_numpy()),
-        })
-        label = "60-session forecast (validated model)"
-    else:
-        forecast = pd.DataFrame({
-            "ds": future_dates,
-            "yhat": baseline_prices[-1],
-            "yhat_lower": baseline_prices[-1],
-            "yhat_upper": baseline_prices[-1],
-        })
-        label = "60-session forecast (last-price baseline)"
-
-    return forecast, {
-        "model_mae": model_mae,
-        "baseline_mae": baseline_mae,
-        "use_model": use_model,
-        "label": label,
-    }
