@@ -5,9 +5,8 @@ import pandas as pd
 import re
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from .utils import get_historical_stock_data, calculate_moving_average
+from .utils import get_historical_stock_data, calculate_moving_average, build_price_forecast
 from .utils import get_trending_stocks, fetch_sectors_data, fetch_industry_top_companies, fetch_sector_top_companies
-from prophet import Prophet
 from django.views.decorators.cache import cache_page
 import time
 from datetime import datetime
@@ -21,7 +20,18 @@ import yfinance as yf
 def home(request):
     sectors = fetch_sectors_data()
     stocks = get_trending_stocks()
-    return render(request, 'home.html', {'stocks': stocks, 'sectors': sectors})
+    labels = [d["name"] for d in sectors]
+    values = [float(d["market_weight"][:-1]) for d in sectors]
+    urls = [f"/sectors/{d['key']}/" for d in sectors]
+
+    context = {
+        "sectors": sectors,
+        "labels": labels,
+        "values": values,
+        "urls": urls,
+        "stocks": stocks,
+    }
+    return render(request, 'home.html', context)
 
 
 def fundamental_analysis(request):
@@ -34,8 +44,16 @@ def technical_analysis(request, ticker):
 
 @cache_page(60 * 60 * 24)
 def sectors(request):
-    sectors = fetch_sectors_data()
-    return render(request, 'sectors_page.html', {'sectors': sectors})
+    data = fetch_sectors_data()
+    labels = [d["name"] for d in data]
+    values = [d["market_weight"] for d in data]
+
+    context = {
+        "sectors": data,
+        "labels": labels,
+        "values": values,
+    }
+    return render(request, 'sectors_page.html', context)
 
 
 @cache_page(60 * 60 * 24)
@@ -44,7 +62,6 @@ def sector(request, name):
     overview = sector_data.overview
     industries = sector_data.industries.reset_index().to_dict(orient='records')
     top_companies = fetch_sector_top_companies(sector_data.name, 'in')
-    print(top_companies)
     sector = {
         "key": sector_data.key,
         "name": sector_data.name,
@@ -113,16 +130,14 @@ def stock(request, ticker):
         'Volume': 'sum'
     })
 
-    # AI training data
-    train_df = stock_df[['Date', 'Close']]
-    train_df = train_df.rename(
-        columns={'Date': 'ds', 'Close': 'y'})
-    train_df['ds'] = train_df['ds'].apply(
-        lambda x: x.replace(tzinfo=None))
-    m = Prophet()
-    m.fit(train_df)
-    future = m.make_future_dataframe(periods=365)
-    forecast = m.predict(future)
+    # Forecasts are checked against an unseen 60-session holdout.  A simple
+    # last-close forecast is shown when Prophet cannot beat that baseline.
+    try:
+        forecast, forecast_quality = build_price_forecast(stock_df['Close'])
+    except (ValueError, RuntimeError) as exc:
+        print(f"Unable to build validated forecast for {ticker}: {exc}")
+        forecast = None
+        forecast_quality = None
 
     # Calculate 50-day moving averages for both daily and weekly data
     moving_avg_daily_21 = calculate_moving_average(
@@ -208,21 +223,18 @@ def stock(request, ticker):
                                             visible=False)
     fig.add_trace(weekly_moving_avg_trace_50, row=1, col=1)
 
-    # Forecast trace
-    forecast_trace = go.Scatter(x=forecast['ds'],
-                                y=forecast['yhat'],
-                                name='Prediction',
-                                mode='lines',
-                                marker_color='pink')
-    fig.add_trace(forecast_trace, row=1, col=1)
-
-    forecast_trace = go.Scatter(x=forecast['ds'],
-                                y=forecast['yhat'],
-                                name='Prediction',
-                                mode='lines',
-                                marker_color='pink',
-                                visible=False)
-    fig.add_trace(forecast_trace, row=1, col=1)
+    if forecast is not None:
+        fig.add_trace(go.Scatter(
+            x=forecast['ds'], y=forecast['yhat_upper'], mode='lines',
+            line=dict(width=0), hoverinfo='skip', showlegend=False,
+            name='Forecast upper bound'), row=1, col=1)
+        fig.add_trace(go.Scatter(
+            x=forecast['ds'], y=forecast['yhat_lower'], mode='lines',
+            line=dict(width=0), fill='tonexty', fillcolor='rgba(236, 72, 153, 0.15)',
+            hoverinfo='skip', name='80% forecast interval'), row=1, col=1)
+        fig.add_trace(go.Scatter(
+            x=forecast['ds'], y=forecast['yhat'], mode='lines',
+            line=dict(color='#ec4899', width=2), name=forecast_quality['label']), row=1, col=1)
 
     # Customize the chart layout for both daily and weekly charts
     # candlestick_layout = go.Layout(
@@ -239,7 +251,7 @@ def stock(request, ticker):
     #     weekly_candlestick_data).to_json()
 
     # Customize the chart layout if needed
-    fig.update_layout(title=f"Candlestick Chart for {searched}",
+    fig.update_layout(title=f"Candlestick Chart for {ticker.upper()}",
                       xaxis_title="Date",
                       yaxis_title="Price",
                       xaxis_rangeslider_visible=False,
@@ -254,13 +266,13 @@ def stock(request, ticker):
                 buttons=list([
                     dict(
                         args=[
-                            {"visible": [True, False, True, False]}],
+                            {"visible": [True, False, True, False, True, False, True, False] + ([True, True, True] if forecast is not None else [])}],
                         label="Daily",
                         method="update",
                     ),
                     dict(
                         args=[
-                            {"visible": [False, True, False, True]}],
+                            {"visible": [False, True, False, True, False, True, False, True] + ([True, True, True] if forecast is not None else [])}],
                         label="Weekly",
                         method="update"
                     )
@@ -290,7 +302,8 @@ def stock(request, ticker):
         #     'candlestick_data': daily_candlestick_json,
         #     'weekly_candlestick_data': weekly_candlestick_json,
         # })
-        'candlestick_data': chart_data
+        'candlestick_data': chart_data,
+        'forecast_quality': forecast_quality,
     })
 
 
