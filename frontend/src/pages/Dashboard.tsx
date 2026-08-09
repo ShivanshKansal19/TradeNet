@@ -1,3 +1,10 @@
+import MarketIndexCard from "../components/market/MarketIndexCard";
+import MarketBreadth from "../components/market/MarketBreadth";
+import TopMovers from "../components/market/TopMovers";
+import { useMarketOverview } from "../hooks/useMarketOverview";
+import MarketDashboardSkeleton from "../components/market/MarketDashboardSkeleton";
+import MarketStatusBadge from "../components/market/MarketStatusBadge";
+import MarketLastUpdated from "../components/market/MarketLastUpdated";
 import { ArrowDown, ArrowUp, BarChart3, TrendingUp } from "lucide-react";
 
 const indices = [
@@ -61,6 +68,24 @@ const sectors = [
 ];
 
 export default function Dashboard() {
+  const { data, isLoading, isError } = useMarketOverview();
+
+  if (isLoading) {
+    return <MarketDashboardSkeleton />;
+  }
+
+  if (isError || !data) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="text-center">
+          <p className="font-medium">Unable to load market data</p>
+
+          <p className="mt-1 text-sm text-zinc-500">Please try again later.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-7xl space-y-8">
       {/* Header */}
@@ -77,118 +102,25 @@ export default function Dashboard() {
               Track the Indian market and discover opportunities.
             </p>
           </div>
+          <MarketStatusBadge status={data.market_status} />
+          <MarketLastUpdated timestamp={data.timestamp} />
         </div>
       </div>
 
       {/* Index cards */}
       <section className="grid gap-4 md:grid-cols-3">
-        {indices.map((index) => (
-          <div
-            key={index.name}
-            className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5"
-          >
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-zinc-400">{index.name}</p>
-
-              <BarChart3 size={18} className="text-zinc-600" />
-            </div>
-
-            <div className="mt-4 flex items-end justify-between">
-              <p className="text-2xl font-semibold">{index.value}</p>
-
-              <span
-                className={`flex items-center gap-1 text-sm font-medium ${
-                  index.positive ? "text-emerald-500" : "text-red-500"
-                }`}
-              >
-                {index.positive ? (
-                  <ArrowUp size={15} />
-                ) : (
-                  <ArrowDown size={15} />
-                )}
-
-                {index.change}
-              </span>
-            </div>
-          </div>
+        {data.indices.map((index) => (
+          <MarketIndexCard key={index.symbol} index={index} />
         ))}
       </section>
 
       {/* Main grid */}
       <section className="grid gap-6 lg:grid-cols-2">
         {/* Market breadth */}
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="font-semibold">Market Breadth</h2>
-              <p className="mt-1 text-sm text-zinc-500">
-                NSE advancing vs declining stocks
-              </p>
-            </div>
-
-            <TrendingUp size={19} className="text-zinc-500" />
-          </div>
-
-          <div className="mt-8">
-            <div className="flex justify-between text-sm">
-              <span className="text-emerald-500">Advancing</span>
-
-              <span>1,248</span>
-            </div>
-
-            <div className="mt-2 h-3 overflow-hidden rounded-full bg-zinc-800">
-              <div className="h-full w-[68%] rounded-full bg-emerald-500" />
-            </div>
-
-            <div className="mt-6 flex justify-between text-sm">
-              <span className="text-red-500">Declining</span>
-
-              <span>584</span>
-            </div>
-
-            <div className="mt-2 h-3 overflow-hidden rounded-full bg-zinc-800">
-              <div className="h-full w-[32%] rounded-full bg-red-500" />
-            </div>
-          </div>
-        </div>
+        <MarketBreadth breadth={data.breadth} />
 
         {/* Top movers */}
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
-          <div>
-            <h2 className="font-semibold">Top Movers</h2>
-
-            <p className="mt-1 text-sm text-zinc-500">
-              Stocks with notable price changes
-            </p>
-          </div>
-
-          <div className="mt-5 divide-y divide-zinc-800">
-            {movers.map((stock) => (
-              <div
-                key={stock.symbol}
-                className="flex items-center justify-between py-3"
-              >
-                <div>
-                  <p className="text-sm font-medium">{stock.symbol}</p>
-
-                  <p className="text-xs text-zinc-500">{stock.name}</p>
-                </div>
-
-                <div className="text-right">
-                  <p className="text-sm">{stock.price}</p>
-
-                  <p
-                    className={`text-xs ${
-                      stock.positive ? "text-emerald-500" : "text-red-500"
-                    }`}
-                  >
-                    {stock.change}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <TopMovers gainers={data.movers.gainers} losers={data.movers.losers} />
       </section>
 
       {/* Sectors */}

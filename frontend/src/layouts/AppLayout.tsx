@@ -1,4 +1,5 @@
 import { Link, Outlet } from "react-router-dom";
+import DevelopmentBanner from "../components/common/DevelopmentBanner";
 import {
   Bell,
   BarChart3,
@@ -142,8 +143,12 @@ export default function AppLayout() {
         </header>
 
         {/* Page */}
-        <main className="p-6">
-          <Outlet />
+        <main>
+          <DevelopmentBanner />
+
+          <div className="p-6">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
