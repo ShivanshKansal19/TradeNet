@@ -8,18 +8,18 @@ import Watchlist from "../pages/Watchlist";
 import Portfolio from "../pages/Portfolio";
 
 export default function AppRouter() {
-  return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+    return (
+        <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/stocks/:symbol" element={<StockDetail />} />
-      <Route path="/compare" element={<Compare />} />
-      <Route path="/screener" element={<Screener />} />
-      <Route path="/watchlist" element={<Watchlist />} />
-      <Route path="/portfolio" element={<Portfolio />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/stocks/:symbol" element={<StockDetail />} />
+            <Route path="/compare" element={<Compare />} />
+            <Route path="/screener" element={<Screener />} />
+            <Route path="/watchlist" element={<Watchlist />} />
+            <Route path="/portfolio" element={<Portfolio />} />
 
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
-    </Routes>
-  );
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+    );
 }
