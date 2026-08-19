@@ -1,8 +1,6 @@
-// Forecasts Feature Module
-export interface ForecastData {
-  symbol: string;
-  horizon_days: number;
-  probability_positive: number;
-  expected_return_pct: number;
-  confidence_label: "high" | "medium" | "low";
-}
+export * from "./types/forecast";
+export * from "./services/forecastService";
+export * from "./hooks/useStockForecast";
+export { default as ForecastCard } from "./components/ForecastCard";
+export { default as ValidationScoreBadge } from "./components/ValidationScoreBadge";
+export { default as ForecastDisclaimer } from "./components/ForecastDisclaimer";

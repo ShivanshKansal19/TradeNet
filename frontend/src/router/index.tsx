@@ -1,25 +1,23 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import Dashboard from "../pages/Dashboard";
-import StockDetail from "../pages/StockDetail";
-import Compare from "../pages/Compare";
-import Screener from "../pages/Screener";
-import Watchlist from "../pages/Watchlist";
-import Portfolio from "../pages/Portfolio";
+import StockDetailPage from "../pages/StockDetailPage";
+import ComparePage from "../pages/ComparePage";
+import ScreenerPage from "../pages/ScreenerPage";
+import WatchlistPage from "../pages/WatchlistPage";
+import PortfolioPage from "../pages/PortfolioPage";
 
 export default function AppRouter() {
-    return (
-        <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/stocks/:symbol" element={<StockDetail />} />
-            <Route path="/compare" element={<Compare />} />
-            <Route path="/screener" element={<Screener />} />
-            <Route path="/watchlist" element={<Watchlist />} />
-            <Route path="/portfolio" element={<Portfolio />} />
-
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-    );
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/stocks/:symbol" element={<StockDetailPage />} />
+      <Route path="/compare" element={<ComparePage />} />
+      <Route path="/screener" element={<ScreenerPage />} />
+      <Route path="/watchlist" element={<WatchlistPage />} />
+      <Route path="/portfolio" element={<PortfolioPage />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
+  );
 }

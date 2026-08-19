@@ -1,5 +1,1 @@
-// src/pages/Watchlist.tsx
-
-export default function Watchlist() {
-  return <div>Watchlist</div>;
-}
+export { default } from "./WatchlistPage";

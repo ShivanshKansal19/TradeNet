@@ -1,5 +1,1 @@
-// src/pages/Portfolio.tsx
-
-export default function Portfolio() {
-  return <div>Portfolio</div>;
-}
+export { default } from "./PortfolioPage";
