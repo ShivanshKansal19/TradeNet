@@ -7,6 +7,8 @@ import {
   TrendingDown,
   ArrowRight,
   Inbox,
+  Briefcase,
+  Bookmark,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -16,11 +18,13 @@ import type { ScreenerStockItem } from "../types/screener";
 
 interface Props {
   stocks: ScreenerStockItem[];
+  onAddToPortfolio?: (stock: ScreenerStockItem) => void;
+  onAddToWatchlist?: (stock: ScreenerStockItem) => void;
 }
 
 type SortField = "symbol" | "price" | "change_percent" | "market_cap" | "pe_ratio" | "rsi" | "forecast_5d_pct";
 
-export default function ScreenerTable({ stocks }: Props) {
+export default function ScreenerTable({ stocks, onAddToPortfolio, onAddToWatchlist }: Props) {
   const [sortField, setSortField] = useState<SortField>("market_cap");
   const [sortAsc, setSortAsc] = useState(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -127,7 +131,7 @@ export default function ScreenerTable({ stocks }: Props) {
                     <Sparkles size={12} /> 5D AI Forecast <ArrowUpDown size={12} />
                   </div>
                 </th>
-                <th className="pb-3 text-right">Action</th>
+                <th className="pb-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800/60">
@@ -206,12 +210,32 @@ export default function ScreenerTable({ stocks }: Props) {
 
                     {/* Action */}
                     <td className="py-3.5 text-right">
-                      <Link
-                        to={`/stocks/${s.symbol}`}
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition"
-                      >
-                        Analyze <ArrowRight size={12} />
-                      </Link>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => onAddToPortfolio?.(s)}
+                          data-testid={`screener-add-portfolio-${s.symbol}`}
+                          className="rounded-lg bg-zinc-800/80 hover:bg-emerald-500/20 p-1.5 text-zinc-400 hover:text-emerald-400 transition"
+                          title="Add to Portfolio"
+                          aria-label={`Add ${s.symbol} to Portfolio`}
+                        >
+                          <Briefcase size={13} />
+                        </button>
+                        <button
+                          onClick={() => onAddToWatchlist?.(s)}
+                          data-testid={`screener-add-watchlist-${s.symbol}`}
+                          className="rounded-lg bg-zinc-800/80 hover:bg-indigo-500/20 p-1.5 text-zinc-400 hover:text-indigo-400 transition"
+                          title="Add to Watchlist"
+                          aria-label={`Add ${s.symbol} to Watchlist`}
+                        >
+                          <Bookmark size={13} />
+                        </button>
+                        <Link
+                          to={`/stocks/${s.symbol}`}
+                          className="inline-flex items-center gap-1 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 px-2 py-1 text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition"
+                        >
+                          Analyze <ArrowRight size={12} />
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 );

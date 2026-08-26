@@ -31,11 +31,22 @@ export interface PortfolioAnalytics {
   portfolio_id: number;
   portfolio_name: string;
   total_invested: number;
+  total_investment?: number;
   total_current_value: number;
+  current_value?: number;
   total_pnl: number;
   total_return_percent: number;
+  day_pnl?: number;
+  day_pnl_percent?: number;
   holdings_count: number;
   sector_allocations: SectorAllocation[];
+  sector_allocation?: SectorAllocation[];
+  benchmark_comparison?: {
+    benchmark_name: string;
+    benchmark_return_percent: number;
+    portfolio_return_percent: number;
+    alpha: number;
+  };
   holdings: Array<{
     id: number;
     symbol: string;
@@ -48,6 +59,8 @@ export interface PortfolioAnalytics {
     current_value: number;
     pnl: number;
     pnl_percent: number;
+    day_pnl?: number;
+    day_pnl_percent?: number;
   }>;
 }
 

@@ -1,13 +1,14 @@
 import { Link } from "react-router-dom";
-import { GitCompare, Bookmark, TrendingUp, TrendingDown } from "lucide-react";
+import { GitCompare, Bookmark, Briefcase, TrendingUp, TrendingDown } from "lucide-react";
 import type { Stock } from "../types/stock";
 
 interface Props {
   stock: Stock;
   onAddToWatchlist?: () => void;
+  onAddToPortfolio?: () => void;
 }
 
-export default function StockHeader({ stock, onAddToWatchlist }: Props) {
+export default function StockHeader({ stock, onAddToWatchlist, onAddToPortfolio }: Props) {
   const price = stock.price ?? 0;
   const change = stock.change ?? 0;
   const changePercent = stock.change_percent ?? 0;
@@ -58,9 +59,18 @@ export default function StockHeader({ stock, onAddToWatchlist }: Props) {
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={onAddToPortfolio}
+              data-testid="stock-detail-add-to-portfolio-btn"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600/20 border border-emerald-500/30 hover:bg-emerald-600/30 text-emerald-400 px-3.5 py-2 text-xs font-semibold transition"
+            >
+              <Briefcase size={14} />
+              Add to Portfolio
+            </button>
             <button
               onClick={onAddToWatchlist}
+              data-testid="stock-detail-add-to-watchlist-btn"
               className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3.5 py-2 text-xs font-semibold transition"
             >
               <Bookmark size={14} />
@@ -68,7 +78,7 @@ export default function StockHeader({ stock, onAddToWatchlist }: Props) {
             </button>
             <Link
               to={`/compare?stock1=${stock.symbol}`}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 text-xs font-semibold transition shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white px-3.5 py-2 text-xs font-semibold transition shadow-sm"
             >
               <GitCompare size={14} />
               Compare

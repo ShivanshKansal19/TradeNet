@@ -1,4 +1,9 @@
 """Pytest configuration and fixtures."""
+import os
+import django
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
+django.setup()
+
 import pytest
 from decimal import Decimal
 from datetime import date, timedelta

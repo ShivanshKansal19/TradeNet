@@ -1,3 +1,4 @@
+import decimal
 from decimal import Decimal
 from rest_framework import generics, permissions, status, views
 from rest_framework.response import Response
@@ -31,11 +32,30 @@ class PortfolioHoldingManageView(views.APIView):
         portfolio = get_object_or_404(Portfolio, id=pk, user=request.user)
         stock_id = request.data.get("stock_id")
         symbol = request.data.get("symbol")
-        quantity = Decimal(str(request.data.get("quantity", 0)))
-        average_buy_price = Decimal(str(request.data.get("average_buy_price", 0)))
+
+        if not stock_id and not symbol:
+            return Response(
+                {"detail": "Provide stock_id or symbol to add holding."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            quantity = Decimal(str(request.data.get("quantity", 0)))
+            average_buy_price = Decimal(str(request.data.get("average_buy_price", 0)))
+        except (ValueError, TypeError, decimal.InvalidOperation):
+            return Response(
+                {"detail": "Invalid quantity or average_buy_price format."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if quantity <= Decimal("0") or average_buy_price < Decimal("0"):
+            return Response(
+                {"detail": "Quantity must be greater than 0 and average buy price cannot be negative."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         if symbol and not stock_id:
-            stock = get_object_or_404(Stock, symbol__iexact=symbol.replace(".NS", ""))
+            stock = get_object_or_404(Stock, symbol__iexact=str(symbol).replace(".NS", "").strip())
         else:
             stock = get_object_or_404(Stock, id=stock_id)
 
@@ -63,8 +83,8 @@ class PortfolioHoldingManageView(views.APIView):
 
     def delete(self, request, pk):
         portfolio = get_object_or_404(Portfolio, id=pk, user=request.user)
-        holding_id = request.query_params.get("holding_id")
-        symbol = request.query_params.get("symbol")
+        holding_id = request.query_params.get("holding_id") or request.data.get("holding_id")
+        symbol = request.query_params.get("symbol") or request.data.get("symbol")
 
         if holding_id:
             holding = get_object_or_404(PortfolioHolding, id=holding_id, portfolio=portfolio)
@@ -73,7 +93,7 @@ class PortfolioHoldingManageView(views.APIView):
             holding = get_object_or_404(
                 PortfolioHolding,
                 portfolio=portfolio,
-                stock__symbol__iexact=symbol.replace(".NS", ""),
+                stock__symbol__iexact=str(symbol).replace(".NS", "").strip(),
             )
             holding.delete()
         else:

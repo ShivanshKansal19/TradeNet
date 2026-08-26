@@ -137,15 +137,16 @@ export default function PortfolioPage() {
     }
   };
 
-  const handleAddHolding = async (newHolding: Holding) => {
-    if (!activePortfolio) return;
+  const handleAddHolding = async (newHolding: Holding, targetPortfolioId?: number | string) => {
+    const portfolioIdToUse = targetPortfolioId || activePortfolio?.id;
+    if (!portfolioIdToUse) return;
     try {
-      await portfolioService.addHolding(activePortfolio.id, {
+      await portfolioService.addHolding(portfolioIdToUse, {
         symbol: newHolding.symbol,
         quantity: newHolding.quantity,
         average_buy_price: newHolding.averageBuyPrice,
       });
-      await loadAnalytics(activePortfolio.id);
+      await loadAnalytics(portfolioIdToUse);
       await loadPortfolios();
     } catch (err: any) {
       console.error("Failed to add holding:", err);
@@ -186,8 +187,8 @@ export default function PortfolioPage() {
         currentValue: analytics.total_current_value,
         totalPnl: analytics.total_pnl,
         totalPnlPercent: analytics.total_return_percent,
-        todayPnl: analytics.total_current_value * 0.0142,
-        todayPnlPercent: 1.42,
+        todayPnl: analytics.day_pnl ?? (analytics.total_current_value * 0.0142),
+        todayPnlPercent: analytics.day_pnl_percent ?? 1.42,
         cashBalance: 45000,
       }
     : calculatePortfolioSummary(holdings);
@@ -305,9 +306,9 @@ export default function PortfolioPage() {
               totalValue={`₹${(summary.currentValue / 100000).toFixed(2)}L`}
             />
             <BenchmarkComparison
-              portfolioReturnPct={summary.totalPnlPercent}
-              benchmarkName="NIFTY 50"
-              benchmarkReturnPct={14.8}
+              portfolioReturnPct={analytics?.benchmark_comparison?.portfolio_return_percent ?? summary.totalPnlPercent}
+              benchmarkName={analytics?.benchmark_comparison?.benchmark_name ?? "NIFTY 50"}
+              benchmarkReturnPct={analytics?.benchmark_comparison?.benchmark_return_percent ?? 14.8}
             />
           </div>
 
@@ -321,6 +322,8 @@ export default function PortfolioPage() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAddHolding={handleAddHolding}
+        portfolios={portfolios}
+        activePortfolioId={activePortfolio?.id}
       />
 
       {/* Create Portfolio Modal */}
