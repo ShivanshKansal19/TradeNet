@@ -1,11 +1,12 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { ListFilter } from "lucide-react";
 import {
   ScreenerFilterBar,
   ScreenerTable,
   filterScreenerStocks,
-  MOCK_SCREENER_STOCKS,
+  fetchScreenerStocks,
   type ScreenerFilters,
+  type ScreenerStockItem,
 } from "../features/screener";
 
 const INITIAL_FILTERS: ScreenerFilters = {
@@ -19,10 +20,15 @@ const INITIAL_FILTERS: ScreenerFilters = {
 
 export default function ScreenerPage() {
   const [filters, setFilters] = useState<ScreenerFilters>(INITIAL_FILTERS);
+  const [stocks, setStocks] = useState<ScreenerStockItem[]>([]);
+
+  useEffect(() => {
+    fetchScreenerStocks().then(setStocks);
+  }, []);
 
   const filteredStocks = useMemo(() => {
-    return filterScreenerStocks(MOCK_SCREENER_STOCKS, filters);
-  }, [filters]);
+    return filterScreenerStocks(stocks, filters);
+  }, [stocks, filters]);
 
   return (
     <div className="space-y-6">

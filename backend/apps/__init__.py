@@ -1,1 +1,0 @@
-# TradeNet Django Domain Applications

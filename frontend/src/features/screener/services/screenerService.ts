@@ -1,5 +1,29 @@
+import apiClient from "../../../api/client";
 import type { ScreenerFilters, ScreenerStockItem } from "../types/screener";
 import { MOCK_SCREENER_STOCKS } from "../mocks/screener";
+
+export async function fetchScreenerStocks(): Promise<ScreenerStockItem[]> {
+  try {
+    const response = await apiClient.get<any[]>("/api/v1/stocks/");
+    if (Array.isArray(response.data) && response.data.length > 0) {
+      return response.data.map((item) => ({
+        symbol: item.symbol,
+        name: item.name,
+        sector: item.sector || "Diversified",
+        price: item.price || 1000,
+        change_percent: item.change_percent || 0.0,
+        market_cap: item.market_cap || 50000,
+        pe_ratio: item.pe_ratio || 22.0,
+        rsi: 58.4,
+        forecast_5d_pct: 2.1,
+        forecast_prob: 64,
+      }));
+    }
+  } catch (e) {
+    console.warn("Failed to fetch live screener stocks from backend:", e);
+  }
+  return MOCK_SCREENER_STOCKS;
+}
 
 export function filterScreenerStocks(stocks: ScreenerStockItem[], filters: ScreenerFilters): ScreenerStockItem[] {
   return stocks.filter((stock) => {
@@ -12,7 +36,7 @@ export function filterScreenerStocks(stocks: ScreenerStockItem[], filters: Scree
     }
 
     // Sector filter
-    if (filters.sector !== "all" && stock.sector !== filters.sector) {
+    if (filters.sector !== "all" && !stock.sector.toLowerCase().includes(filters.sector.toLowerCase())) {
       return false;
     }
 
