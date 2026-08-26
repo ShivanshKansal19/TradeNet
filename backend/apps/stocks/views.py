@@ -43,15 +43,19 @@ class StockSearchView(views.APIView):
         query = request.query_params.get("q", "").strip()
         limit = int(request.query_params.get("limit", 20))
         results = StockService.search_stocks(query, limit=limit)
-        serializer = StockSummarySerializer(results, many=True)
-        return Response({"count": len(results), "results": serializer.data})
+        return Response({"count": len(results), "results": results})
 
 class StockDetailView(views.APIView):
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request, symbol):
-        clean_symbol = symbol.strip().upper().replace(".NS", "")
-        stock = get_object_or_404(Stock, symbol__iexact=clean_symbol)
+        clean_symbol = symbol.strip().upper().replace(".NS", "").replace(".BO", "")
+        stock = StockService.get_or_fetch_stock(clean_symbol)
+        if not stock:
+            return Response(
+                {"detail": f"Stock {clean_symbol} not found on NSE/BSE."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
         serializer = StockDetailSerializer(stock)
         return Response(serializer.data)
 
@@ -59,8 +63,13 @@ class StockHistoryView(views.APIView):
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request, symbol):
-        clean_symbol = symbol.strip().upper().replace(".NS", "")
-        stock = get_object_or_404(Stock, symbol__iexact=clean_symbol)
+        clean_symbol = symbol.strip().upper().replace(".NS", "").replace(".BO", "")
+        stock = StockService.get_or_fetch_stock(clean_symbol)
+        if not stock:
+            return Response(
+                {"detail": f"Stock {clean_symbol} not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
         time_range = request.query_params.get("range", "1y")
         history = StockService.get_price_history(stock, time_range=time_range)
         serializer = StockPriceSerializer(history, many=True)
@@ -75,8 +84,13 @@ class StockFundamentalsView(views.APIView):
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request, symbol):
-        clean_symbol = symbol.strip().upper().replace(".NS", "")
-        stock = get_object_or_404(Stock, symbol__iexact=clean_symbol)
+        clean_symbol = symbol.strip().upper().replace(".NS", "").replace(".BO", "")
+        stock = StockService.get_or_fetch_stock(clean_symbol)
+        if not stock:
+            return Response(
+                {"detail": f"Stock {clean_symbol} not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
         try:
             fundamental = stock.fundamentals
             serializer = StockFundamentalSerializer(fundamental)

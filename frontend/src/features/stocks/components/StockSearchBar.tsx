@@ -71,32 +71,38 @@ export default function StockSearchBar({
             <div className="p-4 text-center text-xs text-zinc-500">Searching market stocks...</div>
           ) : results.length > 0 ? (
             <div className="space-y-1">
-              {results.map((item) => (
-                <button
-                  key={item.symbol}
-                  onClick={() => handleSelect(item.symbol)}
-                  className="flex w-full items-center justify-between rounded-lg p-2.5 text-left hover:bg-zinc-900 transition-colors"
-                >
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm text-white">{item.symbol}</span>
-                      <span className="text-xs text-zinc-400 truncate max-w-[200px]">{item.name}</span>
+              {results.map((item) => {
+                const price = Number(item.price || 0);
+                const chgPct = Number(item.change_percent || 0);
+                return (
+                  <button
+                    key={item.symbol}
+                    onClick={() => handleSelect(item.symbol)}
+                    className="flex w-full items-center justify-between rounded-lg p-2.5 text-left hover:bg-zinc-900 transition-colors"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm text-white">{item.symbol}</span>
+                        <span className="text-xs text-zinc-400 truncate max-w-[200px]">{item.name}</span>
+                      </div>
+                      {item.sector && <span className="text-[11px] text-zinc-500">{item.sector}</span>}
                     </div>
-                    {item.sector && <span className="text-[11px] text-zinc-500">{item.sector}</span>}
-                  </div>
-                  <div className="text-right">
-                    <span className="text-sm font-semibold text-white">₹{item.price.toFixed(2)}</span>
-                    <p
-                      className={`text-xs font-semibold ${
-                        item.change_percent >= 0 ? "text-emerald-400" : "text-rose-400"
-                      }`}
-                    >
-                      {item.change_percent >= 0 ? "+" : ""}
-                      {item.change_percent.toFixed(2)}%
-                    </p>
-                  </div>
-                </button>
-              ))}
+                    {price > 0 && (
+                      <div className="text-right">
+                        <span className="text-sm font-semibold text-white">₹{price.toFixed(2)}</span>
+                        <p
+                          className={`text-xs font-semibold ${
+                            chgPct >= 0 ? "text-emerald-400" : "text-rose-400"
+                          }`}
+                        >
+                          {chgPct >= 0 ? "+" : ""}
+                          {chgPct.toFixed(2)}%
+                        </p>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           ) : (
             <div className="p-4 text-center text-xs text-zinc-500">No stocks matching "{query}"</div>

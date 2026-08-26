@@ -1,8 +1,10 @@
+from decimal import Decimal
 from django.utils import timezone
 from rest_framework import views, permissions, status
 from rest_framework.response import Response
 from .models import MarketIndex, SectorPerformance
 from .serializers import MarketIndexSerializer, SectorPerformanceSerializer
+from .providers.yahoo_finance import YFinanceProvider
 from apps.stocks.models import Stock
 from apps.stocks.serializers import StockSummarySerializer
 
@@ -10,6 +12,23 @@ class MarketOverviewView(views.APIView):
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request):
+        provider = YFinanceProvider()
+        # Fetch/Sync live market indices
+        try:
+            live_indices = provider.fetch_market_indices()
+            for item in live_indices:
+                MarketIndex.objects.update_or_create(
+                    symbol=item["symbol"],
+                    defaults={
+                        "name": item["name"],
+                        "value": Decimal(str(round(item["value"], 2))),
+                        "change": Decimal(str(round(item["change"], 2))),
+                        "change_percent": Decimal(str(round(item["change_percent"], 4))),
+                    },
+                )
+        except Exception:
+            pass
+
         indices = MarketIndex.objects.all()
         sectors = SectorPerformance.objects.all()
         

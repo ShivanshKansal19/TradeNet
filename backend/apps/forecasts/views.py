@@ -1,7 +1,6 @@
 from rest_framework import views, permissions, status
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
-from apps.stocks.models import Stock
+from apps.stocks.services.stock_service import StockService
 from .models import Forecast
 from .serializers import ForecastSerializer
 
@@ -9,8 +8,13 @@ class StockForecastView(views.APIView):
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request, symbol):
-        clean_symbol = symbol.strip().upper().replace(".NS", "")
-        stock = get_object_or_404(Stock, symbol__iexact=clean_symbol)
+        clean_symbol = symbol.strip().upper().replace(".NS", "").replace(".BO", "")
+        stock = StockService.get_or_fetch_stock(clean_symbol)
+        if not stock:
+            return Response(
+                {"detail": f"Stock {clean_symbol} not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
         
         horizon_param = request.query_params.get("horizon", "5d").lower().replace("d", "")
         try:
