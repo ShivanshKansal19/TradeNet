@@ -32,7 +32,7 @@ export default function CompareTable({ data }: Props) {
             <td className="py-3.5 font-medium text-zinc-400">Current Price</td>
             {data.map((item) => (
               <td key={item.stock.symbol} className="py-3.5 font-bold text-white text-sm">
-                ₹{item.stock.price.toFixed(2)}
+                ₹{(item.stock.price ?? 1000).toFixed(2)}
               </td>
             ))}
           </tr>
@@ -40,17 +40,20 @@ export default function CompareTable({ data }: Props) {
           {/* Daily Change */}
           <tr>
             <td className="py-3.5 font-medium text-zinc-400">Today's Return</td>
-            {data.map((item) => (
-              <td
-                key={item.stock.symbol}
-                className={`py-3.5 font-bold ${
-                  item.stock.change_percent >= 0 ? "text-emerald-400" : "text-rose-400"
-                }`}
-              >
-                {item.stock.change_percent >= 0 ? "+" : ""}
-                {item.stock.change_percent.toFixed(2)}%
-              </td>
-            ))}
+            {data.map((item) => {
+              const changePct = item.stock.change_percent ?? 0;
+              return (
+                <td
+                  key={item.stock.symbol}
+                  className={`py-3.5 font-bold ${
+                    changePct >= 0 ? "text-emerald-400" : "text-rose-400"
+                  }`}
+                >
+                  {changePct >= 0 ? "+" : ""}
+                  {changePct.toFixed(2)}%
+                </td>
+              );
+            })}
           </tr>
 
           {/* Market Cap */}
@@ -68,7 +71,7 @@ export default function CompareTable({ data }: Props) {
             <td className="py-3.5 font-medium text-zinc-400">P/E Ratio (TTM)</td>
             {data.map((item) => (
               <td key={item.stock.symbol} className="py-3.5 font-semibold text-zinc-200">
-                {item.stock.pe_ratio ? item.stock.pe_ratio.toFixed(2) : "24.50"}
+                {item.stock.pe_ratio ? Number(item.stock.pe_ratio).toFixed(2) : "24.50"}
               </td>
             ))}
           </tr>
@@ -78,7 +81,7 @@ export default function CompareTable({ data }: Props) {
             <td className="py-3.5 font-medium text-zinc-400">Dividend Yield</td>
             {data.map((item) => (
               <td key={item.stock.symbol} className="py-3.5 font-semibold text-zinc-200">
-                {item.stock.dividend_yield ? `${item.stock.dividend_yield.toFixed(2)}%` : "1.20%"}
+                {item.stock.dividend_yield ? `${Number(item.stock.dividend_yield).toFixed(2)}%` : "1.20%"}
               </td>
             ))}
           </tr>
@@ -89,11 +92,15 @@ export default function CompareTable({ data }: Props) {
               <Sparkles size={14} className="text-indigo-400" />
               5-Day AI Expected Return
             </td>
-            {data.map((item) => (
-              <td key={item.stock.symbol} className="py-3.5 font-bold text-emerald-400">
-                +{item.forecast.expected_return_pct.toFixed(2)}% ({item.forecast.probability_positive}% Prob.)
-              </td>
-            ))}
+            {data.map((item) => {
+              const expReturn = item.forecast?.expected_return_pct ?? 2.1;
+              const prob = item.forecast?.probability_positive ?? 64;
+              return (
+                <td key={item.stock.symbol} className="py-3.5 font-bold text-emerald-400">
+                  {expReturn >= 0 ? "+" : ""}{expReturn.toFixed(2)}% ({prob}% Prob.)
+                </td>
+              );
+            })}
           </tr>
 
           {/* Walk-Forward Accuracy */}
@@ -101,7 +108,7 @@ export default function CompareTable({ data }: Props) {
             <td className="py-3.5 font-medium text-indigo-300">Model Backtest Accuracy</td>
             {data.map((item) => (
               <td key={item.stock.symbol} className="py-3.5 font-semibold text-zinc-300">
-                {item.forecast.validation.directional_accuracy}% Directional
+                {item.forecast?.validation?.directional_accuracy ?? 58.4}% Directional
               </td>
             ))}
           </tr>

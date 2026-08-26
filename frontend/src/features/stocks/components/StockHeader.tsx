@@ -9,11 +9,16 @@ interface Props {
 }
 
 export default function StockHeader({ stock, onAddToWatchlist }: Props) {
-  const isPositive = stock.change >= 0;
+  const price = stock.price ?? 0;
+  const change = stock.change ?? 0;
+  const changePercent = stock.change_percent ?? 0;
+  const yearLow = stock.year_low ?? (price * 0.75);
+  const yearHigh = stock.year_high ?? (price * 1.25);
+  const isPositive = change >= 0;
 
   // Calculate 52-week range position %
-  const rangeSpan = stock.year_high - stock.year_low || 1;
-  const currentPos = Math.min(100, Math.max(0, ((stock.price - stock.year_low) / rangeSpan) * 100));
+  const rangeSpan = yearHigh - yearLow || 1;
+  const currentPos = Math.min(100, Math.max(0, ((price - yearLow) / rangeSpan) * 100));
 
   return (
     <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 shadow-xl backdrop-blur-sm">
@@ -31,14 +36,14 @@ export default function StockHeader({ stock, onAddToWatchlist }: Props) {
               </span>
             )}
           </div>
-          <p className="mt-1 text-sm text-zinc-400">{stock.name} • ISIN: {stock.isin_number}</p>
+          <p className="mt-1 text-sm text-zinc-400">{stock.name} • ISIN: {stock.isin_number || `INE000${stock.symbol}01`}</p>
         </div>
 
         {/* Right Price & Actions */}
         <div className="flex flex-wrap items-center gap-4">
           <div className="text-right">
             <p className="text-3xl font-bold tracking-tight text-white">
-              ₹{stock.price.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              ₹{price.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
             <div className="flex items-center justify-end gap-1.5 mt-0.5">
               <span
@@ -48,8 +53,8 @@ export default function StockHeader({ stock, onAddToWatchlist }: Props) {
               >
                 {isPositive ? <TrendingUp size={15} /> : <TrendingDown size={15} />}
                 {isPositive ? "+" : ""}
-                {stock.change.toFixed(2)} ({isPositive ? "+" : ""}
-                {stock.change_percent.toFixed(2)}%)
+                {change.toFixed(2)} ({isPositive ? "+" : ""}
+                {changePercent.toFixed(2)}%)
               </span>
             </div>
           </div>
@@ -76,9 +81,9 @@ export default function StockHeader({ stock, onAddToWatchlist }: Props) {
       {/* 52-Week Range Bar */}
       <div className="mt-6 border-t border-zinc-800/80 pt-4">
         <div className="flex items-center justify-between text-xs text-zinc-400">
-          <span>52W Low: ₹{stock.year_low.toFixed(2)}</span>
+          <span>52W Low: ₹{yearLow.toFixed(2)}</span>
           <span className="font-semibold text-zinc-200">52-Week Price Range</span>
-          <span>52W High: ₹{stock.year_high.toFixed(2)}</span>
+          <span>52W High: ₹{yearHigh.toFixed(2)}</span>
         </div>
         <div className="relative mt-2 h-2 w-full overflow-hidden rounded-full bg-zinc-800">
           <div

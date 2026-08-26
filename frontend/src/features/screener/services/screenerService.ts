@@ -1,10 +1,11 @@
 import apiClient from "../../../api/client";
+import { API_ENDPOINTS } from "../../../api/endpoints";
 import type { ScreenerFilters, ScreenerStockItem } from "../types/screener";
 import { MOCK_SCREENER_STOCKS } from "../mocks/screener";
 
 export async function fetchScreenerStocks(): Promise<ScreenerStockItem[]> {
   try {
-    const response = await apiClient.get<any[]>("/api/v1/stocks/");
+    const response = await apiClient.get<any[]>(API_ENDPOINTS.STOCKS.LIST);
     if (Array.isArray(response.data) && response.data.length > 0) {
       return response.data.map((item) => ({
         symbol: item.symbol,

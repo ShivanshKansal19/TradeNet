@@ -59,15 +59,20 @@ export default function Dashboard() {
 
       {/* Index Cards */}
       <section className="grid gap-4 md:grid-cols-3">
-        {data.indices.map((index) => (
+        {(data.indices || []).map((index) => (
           <MarketIndexCard key={index.symbol} index={index} />
         ))}
       </section>
 
       {/* Main Grid: Breadth & Movers */}
       <section className="grid gap-6 lg:grid-cols-2">
-        <MarketBreadth breadth={data.breadth} />
-        <TopMovers gainers={data.movers.gainers} losers={data.movers.losers} />
+        {data.breadth && <MarketBreadth breadth={data.breadth} />}
+        {data.movers && (
+          <TopMovers
+            gainers={data.movers.gainers || []}
+            losers={data.movers.losers || []}
+          />
+        )}
       </section>
 
       {/* Sector Performance */}

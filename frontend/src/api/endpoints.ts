@@ -1,5 +1,6 @@
 export const API_ENDPOINTS = {
   STOCKS: {
+    LIST: "/api/v1/stocks/",
     SEARCH: "/api/v1/stocks/search",
     DETAIL: (symbol: string) => `/api/v1/stocks/${symbol}`,
     HISTORY: (symbol: string) => `/api/v1/stocks/${symbol}/history`,
@@ -16,13 +17,13 @@ export const API_ENDPOINTS = {
     DETAIL: (symbol: string) => `/api/v1/stocks/${symbol}/forecast`,
   },
   WATCHLISTS: {
-    LIST: "/api/v1/watchlists",
+    LIST: "/api/v1/watchlists/",
     DETAIL: (id: string) => `/api/v1/watchlists/${id}`,
   },
   ALERTS: {
-    LIST: "/api/v1/alerts",
+    LIST: "/api/v1/alerts/",
   },
   PORTFOLIOS: {
-    LIST: "/api/v1/portfolios",
+    LIST: "/api/v1/portfolios/",
   },
 };
