@@ -25,6 +25,9 @@ export const API_ENDPOINTS = {
   },
   PORTFOLIOS: {
     LIST: "/api/v1/portfolios/",
+    DETAIL: (id: string | number) => `/api/v1/portfolios/${id}/`,
+    HOLDINGS: (id: string | number) => `/api/v1/portfolios/${id}/holdings/`,
+    ANALYTICS: (id: string | number) => `/api/v1/portfolios/${id}/analytics/`,
   },
   AUTH: {
     REGISTER: "/api/v1/auth/register/",

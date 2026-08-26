@@ -1,58 +1,77 @@
-import type { Holding, PortfolioSummary } from "../types/portfolio";
+import apiClient from "../../../api/client";
+import { API_ENDPOINTS } from "../../../api/endpoints";
+import type {
+  PortfolioItem,
+  PortfolioAnalytics,
+  CreatePortfolioInput,
+  UpdatePortfolioInput,
+  AddHoldingInput,
+  Holding,
+  PortfolioSummary,
+} from "../types/portfolio";
 
-const PORTFOLIO_STORAGE_KEY = "tradenet_portfolio_holdings";
+export const portfolioService = {
+  async getPortfolios(): Promise<PortfolioItem[]> {
+    const response = await apiClient.get<PortfolioItem[] | { results: PortfolioItem[] }>(
+      API_ENDPOINTS.PORTFOLIOS.LIST
+    );
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+    return response.data?.results || [];
+  },
 
-const DEFAULT_HOLDINGS: Holding[] = [
-  {
-    symbol: "RELIANCE",
-    name: "Reliance Industries Ltd.",
-    sector: "Energy",
-    quantity: 50,
-    averageBuyPrice: 1280.00,
-    currentPrice: 1420.50,
+  async getPortfolio(id: string | number): Promise<PortfolioItem> {
+    const response = await apiClient.get<PortfolioItem>(
+      API_ENDPOINTS.PORTFOLIOS.DETAIL(id)
+    );
+    return response.data;
   },
-  {
-    symbol: "TCS",
-    name: "Tata Consultancy Services",
-    sector: "Technology",
-    quantity: 25,
-    averageBuyPrice: 3600.00,
-    currentPrice: 3842.20,
-  },
-  {
-    symbol: "HDFCBANK",
-    name: "HDFC Bank Ltd.",
-    sector: "Banking",
-    quantity: 60,
-    averageBuyPrice: 1750.00,
-    currentPrice: 1946.30,
-  },
-  {
-    symbol: "INFY",
-    name: "Infosys Ltd.",
-    sector: "Technology",
-    quantity: 40,
-    averageBuyPrice: 1480.00,
-    currentPrice: 1632.40,
-  },
-];
 
-export function getSavedHoldings(): Holding[] {
-  try {
-    const raw = localStorage.getItem(PORTFOLIO_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : DEFAULT_HOLDINGS;
-  } catch {
-    return DEFAULT_HOLDINGS;
-  }
-}
+  async createPortfolio(data: CreatePortfolioInput): Promise<PortfolioItem> {
+    const response = await apiClient.post<PortfolioItem>(
+      API_ENDPOINTS.PORTFOLIOS.LIST,
+      data
+    );
+    return response.data;
+  },
 
-export function saveHoldings(holdings: Holding[]): void {
-  try {
-    localStorage.setItem(PORTFOLIO_STORAGE_KEY, JSON.stringify(holdings));
-  } catch (e) {
-    console.error("Failed to save portfolio:", e);
-  }
-}
+  async updatePortfolio(id: string | number, data: UpdatePortfolioInput): Promise<PortfolioItem> {
+    const response = await apiClient.patch<PortfolioItem>(
+      API_ENDPOINTS.PORTFOLIOS.DETAIL(id),
+      data
+    );
+    return response.data;
+  },
+
+  async deletePortfolio(id: string | number): Promise<void> {
+    await apiClient.delete(API_ENDPOINTS.PORTFOLIOS.DETAIL(id));
+  },
+
+  async getPortfolioAnalytics(id: string | number): Promise<PortfolioAnalytics> {
+    const response = await apiClient.get<PortfolioAnalytics>(
+      API_ENDPOINTS.PORTFOLIOS.ANALYTICS(id)
+    );
+    return response.data;
+  },
+
+  async addHolding(portfolioId: string | number, data: AddHoldingInput): Promise<any> {
+    const response = await apiClient.post(
+      API_ENDPOINTS.PORTFOLIOS.HOLDINGS(portfolioId),
+      data
+    );
+    return response.data;
+  },
+
+  async removeHolding(
+    portfolioId: string | number,
+    identifier: { symbol?: string; holding_id?: number }
+  ): Promise<void> {
+    await apiClient.delete(API_ENDPOINTS.PORTFOLIOS.HOLDINGS(portfolioId), {
+      params: identifier,
+    });
+  },
+};
 
 export function calculatePortfolioSummary(holdings: Holding[]): PortfolioSummary {
   let totalInvested = 0;
@@ -65,7 +84,7 @@ export function calculatePortfolioSummary(holdings: Holding[]): PortfolioSummary
 
   const totalPnl = currentValue - totalInvested;
   const totalPnlPercent = totalInvested > 0 ? (totalPnl / totalInvested) * 100 : 0;
-  
+
   // Approximate today's return at ~1.4%
   const todayPnl = currentValue * 0.0142;
   const todayPnlPercent = 1.42;

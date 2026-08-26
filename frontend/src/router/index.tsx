@@ -24,6 +24,7 @@ export default function AppRouter() {
       <Route element={<RequireAuth />}>
         <Route path="/watchlist" element={<WatchlistPage />} />
         <Route path="/portfolio" element={<PortfolioPage />} />
+        <Route path="/portfolio/:portfolioId" element={<PortfolioPage />} />
         <Route path="/profile" element={<ProfilePage />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
