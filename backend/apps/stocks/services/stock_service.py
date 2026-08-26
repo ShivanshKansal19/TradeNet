@@ -85,6 +85,44 @@ POPULAR_NSE_STOCKS = [
 
 class StockService:
     provider = YFinanceProvider()
+    _init_started = False
+
+    @classmethod
+    def ensure_directory_initialized(cls):
+        """Asynchronously populates official listed NSE equities if DB has few symbols."""
+        if cls._init_started:
+            return
+        cls._init_started = True
+
+        import threading
+
+        def _sync_in_background():
+            try:
+                from apps.market_data.providers.exchange_directory import ExchangeDirectoryProvider
+                if Stock.objects.count() < 100:
+                    equities = ExchangeDirectoryProvider.fetch_all_nse_equities()
+                    existing_symbols = set(Stock.objects.values_list("symbol", flat=True))
+                    new_stocks = []
+                    for eq in equities:
+                        sym = eq["symbol"]
+                        if sym not in existing_symbols:
+                            new_stocks.append(
+                                Stock(
+                                    symbol=sym,
+                                    name=eq.get("name") or sym,
+                                    exchange="NSE",
+                                    sector=eq.get("sector") or "Diversified",
+                                    industry="General",
+                                    is_active=True,
+                                )
+                            )
+                    if new_stocks:
+                        Stock.objects.bulk_create(new_stocks, ignore_conflicts=True, batch_size=500)
+                        logger.info(f"Auto-hydrated {len(new_stocks)} official NSE stocks into database.")
+            except Exception as e:
+                logger.warning(f"Background exchange directory hydration error: {e}")
+
+        threading.Thread(target=_sync_in_background, daemon=True).start()
 
     @staticmethod
     def get_stock_by_symbol(symbol: str) -> Optional[Stock]:
@@ -263,56 +301,62 @@ class StockService:
         return list(qs.order_by("date"))
 
     @classmethod
-    def search_stocks(cls, query: str, limit: int = 20) -> List[Any]:
-        """Searches existing DB stocks + popular NSE directory, and auto-fetches exact matches."""
+    def search_stocks(cls, query: str, limit: int = 25) -> List[Any]:
+        """Searches across all ~2,100+ NSE/BSE stocks with relevance-ranked matching."""
         q_clean = query.strip().upper()
         if not q_clean:
-            return list(Stock.objects.filter(is_active=True)[:limit])
+            # Return active top market cap / active stocks
+            stocks = Stock.objects.filter(is_active=True).order_by("-market_cap")[:limit]
+            return [
+                {
+                    "symbol": s.symbol,
+                    "name": s.name,
+                    "sector": s.sector,
+                    "current_price": float(s.current_price or 0),
+                    "day_change": float(s.day_change or 0),
+                    "day_change_percent": float(s.day_change_percent or 0),
+                }
+                for s in stocks
+            ]
 
-        # 1. Search database
-        db_results = list(
-            Stock.objects.filter(is_active=True)
-            .filter(Q(symbol__icontains=q_clean) | Q(name__icontains=q_clean) | Q(sector__icontains=q_clean))[:limit]
+        # 1. Exact symbol match
+        exact_matches = list(Stock.objects.filter(is_active=True, symbol__iexact=q_clean))
+
+        # 2. Prefix symbol matches
+        prefix_matches = list(
+            Stock.objects.filter(is_active=True, symbol__istartswith=q_clean)
+            .exclude(symbol__iexact=q_clean)[:limit]
         )
 
-        matched_symbols = {s.symbol.upper() for s in db_results}
+        # 3. Substring name and sector matches
+        other_matches = list(
+            Stock.objects.filter(is_active=True)
+            .filter(Q(name__icontains=q_clean) | Q(symbol__icontains=q_clean) | Q(sector__icontains=q_clean))
+            .exclude(symbol__iexact=q_clean)
+            .exclude(symbol__istartswith=q_clean)[:limit]
+        )
 
-        # 2. Add matching popular NSE stocks not yet in DB
-        additional_results = []
-        for item in POPULAR_NSE_STOCKS:
-            sym = item["symbol"].upper()
-            if sym not in matched_symbols and (q_clean in sym or q_clean in item["name"].upper() or q_clean in item["sector"].upper()):
-                additional_results.append(item)
-                if len(db_results) + len(additional_results) >= limit:
-                    break
+        combined_stocks = exact_matches + prefix_matches + other_matches
 
-        # 3. If exact symbol match searched and not in DB, attempt on-demand fetch in background
-        if len(db_results) == 0 and len(additional_results) == 0 and len(q_clean) >= 2:
+        # 4. If no results found in DB and query looks like a ticker, attempt on-demand fetch from Yahoo Finance
+        if len(combined_stocks) == 0 and len(q_clean) >= 2:
             fetched = cls.fetch_and_sync_stock_live(q_clean)
             if fetched:
-                db_results.append(fetched)
+                combined_stocks.append(fetched)
 
-        # Merge results into standard dict/object format
         final_list = []
-        for s in db_results:
-            final_list.append({
-                "symbol": s.symbol,
-                "name": s.name,
-                "sector": s.sector,
-                "current_price": float(s.current_price or 1000),
-                "day_change": float(s.day_change or 0),
-                "day_change_percent": float(s.day_change_percent or 0),
-            })
-
-        for item in additional_results:
-            final_list.append({
-                "symbol": item["symbol"],
-                "name": item["name"],
-                "sector": item["sector"],
-                "current_price": 0.0,
-                "day_change": 0.0,
-                "day_change_percent": 0.0,
-            })
+        seen_symbols = set()
+        for s in combined_stocks:
+            if s.symbol not in seen_symbols:
+                seen_symbols.add(s.symbol)
+                final_list.append({
+                    "symbol": s.symbol,
+                    "name": s.name,
+                    "sector": s.sector,
+                    "current_price": float(s.current_price or 0),
+                    "day_change": float(s.day_change or 0),
+                    "day_change_percent": float(s.day_change_percent or 0),
+                })
 
         return final_list[:limit]
 

@@ -16,6 +16,7 @@ class StockListView(generics.ListAPIView):
     serializer_class = StockSummarySerializer
 
     def get_queryset(self):
+        StockService.ensure_directory_initialized()
         qs = Stock.objects.filter(is_active=True)
         sector = self.request.query_params.get("sector")
         min_market_cap = self.request.query_params.get("min_market_cap")
@@ -40,8 +41,9 @@ class StockSearchView(views.APIView):
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request):
+        StockService.ensure_directory_initialized()
         query = request.query_params.get("q", "").strip()
-        limit = int(request.query_params.get("limit", 20))
+        limit = int(request.query_params.get("limit", 25))
         results = StockService.search_stocks(query, limit=limit)
         return Response({"count": len(results), "results": results})
 

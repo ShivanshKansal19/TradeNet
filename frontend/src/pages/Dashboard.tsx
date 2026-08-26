@@ -21,6 +21,7 @@ const sectors = [
 
 export default function Dashboard() {
   const { data, isLoading, isError } = useMarketOverview();
+  const [indexCategory, setIndexCategory] = React.useState<"major" | "sectoral" | "broad">("major");
 
   if (isLoading) {
     return <MarketDashboardSkeleton />;
@@ -36,6 +37,57 @@ export default function Dashboard() {
       </div>
     );
   }
+
+  const allIndices = data.indices || [];
+
+  const filteredIndices = allIndices.filter((idx) => {
+    const sym = idx.symbol.toUpperCase();
+    const name = idx.name.toUpperCase();
+
+    if (indexCategory === "major") {
+      return (
+        sym === "^NSEI" ||
+        sym === "^BSESN" ||
+        sym === "^NSEBANK" ||
+        sym === "^CNXIT" ||
+        name.includes("NIFTY 50") ||
+        name.includes("SENSEX") ||
+        name.includes("BANK") ||
+        name.includes("IT")
+      );
+    } else if (indexCategory === "sectoral") {
+      return (
+        sym.includes("AUTO") ||
+        sym.includes("PHARMA") ||
+        sym.includes("FMCG") ||
+        sym.includes("METAL") ||
+        sym.includes("REALTY") ||
+        sym.includes("ENERGY") ||
+        sym.includes("INFRA") ||
+        sym.includes("PSE") ||
+        name.includes("AUTO") ||
+        name.includes("PHARMA") ||
+        name.includes("FMCG") ||
+        name.includes("METAL") ||
+        name.includes("REALTY") ||
+        name.includes("ENERGY")
+      );
+    } else if (indexCategory === "broad") {
+      return (
+        sym.includes("500") ||
+        sym.includes("MDCP") ||
+        sym.includes("SMCP") ||
+        name.includes("500") ||
+        name.includes("MIDCAP") ||
+        name.includes("SMALLCAP") ||
+        name.includes("TOTAL")
+      );
+    }
+    return true;
+  });
+
+  // Fallback to top 4 if filtered category is empty
+  const displayIndices = filteredIndices.length > 0 ? filteredIndices : allIndices.slice(0, 4);
 
   return (
     <div className="space-y-8">
@@ -57,11 +109,51 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Index Cards */}
-      <section className="grid gap-4 md:grid-cols-3">
-        {(data.indices || []).map((index) => (
-          <MarketIndexCard key={index.symbol} index={index} />
-        ))}
+      {/* Index Cards Section with Category Switcher */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+            Market Benchmark Indices
+          </h2>
+          <div className="flex items-center rounded-lg bg-zinc-900/80 p-0.5 border border-zinc-800 text-xs">
+            <button
+              onClick={() => setIndexCategory("major")}
+              className={`px-3 py-1 rounded-md font-medium transition-all ${
+                indexCategory === "major"
+                  ? "bg-zinc-800 text-white shadow-sm"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              Major Benchmarks
+            </button>
+            <button
+              onClick={() => setIndexCategory("sectoral")}
+              className={`px-3 py-1 rounded-md font-medium transition-all ${
+                indexCategory === "sectoral"
+                  ? "bg-zinc-800 text-white shadow-sm"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              Sectoral
+            </button>
+            <button
+              onClick={() => setIndexCategory("broad")}
+              className={`px-3 py-1 rounded-md font-medium transition-all ${
+                indexCategory === "broad"
+                  ? "bg-zinc-800 text-white shadow-sm"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              Broad / Mid & Small
+            </button>
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {displayIndices.map((index) => (
+            <MarketIndexCard key={index.symbol} index={index} />
+          ))}
+        </div>
       </section>
 
       {/* Main Grid: Breadth & Movers */}

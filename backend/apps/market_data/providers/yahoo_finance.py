@@ -98,21 +98,19 @@ class YFinanceProvider(AbstractMarketDataProvider):
             return {}
 
     def fetch_market_indices(self) -> List[Dict[str, Any]]:
-        indices = [
-            ("^NSEI", "NIFTY 50"),
-            ("^BSESN", "SENSEX"),
-            ("^NSEBANK", "NIFTY BANK"),
-            ("^CNXIT", "NIFTY IT"),
-        ]
+        from .exchange_directory import ALL_MARKET_INDICES
         results = []
-        for sym, name in indices:
+        for item in ALL_MARKET_INDICES:
+            sym = item["symbol"]
+            name = item["name"]
             quote = self.fetch_quote(sym)
             val = quote.get("current_price") or (24980.5 if sym == "^NSEI" else 81200.0 if sym == "^BSESN" else 51420.0 if sym == "^NSEBANK" else 42110.0)
-            chg = quote.get("day_change") or 120.5
-            chg_pct = quote.get("day_change_percent") or 0.52
+            chg = quote.get("day_change") or 0.0
+            chg_pct = quote.get("day_change_percent") or 0.0
             results.append({
                 "symbol": sym,
                 "name": name,
+                "category": item.get("category", "Broad Market"),
                 "value": float(val),
                 "change": float(chg),
                 "change_percent": float(chg_pct),
