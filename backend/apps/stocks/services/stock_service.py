@@ -89,18 +89,39 @@ class StockService:
 
     @classmethod
     def ensure_directory_initialized(cls):
-        """Asynchronously populates official listed NSE equities if DB has few symbols."""
+        """Populates popular NSE equities immediately and hydrates all official listed equities in the background."""
         if cls._init_started:
             return
         cls._init_started = True
+
+        try:
+            existing_symbols = set(Stock.objects.values_list("symbol", flat=True))
+            initial_seeds = []
+            for item in POPULAR_NSE_STOCKS:
+                sym = item["symbol"]
+                if sym not in existing_symbols:
+                    initial_seeds.append(
+                        Stock(
+                            symbol=sym,
+                            name=item.get("name") or sym,
+                            exchange="NSE",
+                            sector=item.get("sector") or "Diversified",
+                            industry="General",
+                            is_active=True,
+                        )
+                    )
+            if initial_seeds:
+                Stock.objects.bulk_create(initial_seeds, ignore_conflicts=True, batch_size=100)
+        except Exception as e:
+            logger.warning(f"Initial popular stock sync error: {e}")
 
         import threading
 
         def _sync_in_background():
             try:
                 from apps.market_data.providers.exchange_directory import ExchangeDirectoryProvider
-                if Stock.objects.count() < 100:
-                    equities = ExchangeDirectoryProvider.fetch_all_nse_equities()
+                equities = ExchangeDirectoryProvider.fetch_all_nse_equities()
+                if equities:
                     existing_symbols = set(Stock.objects.values_list("symbol", flat=True))
                     new_stocks = []
                     for eq in equities:

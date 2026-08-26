@@ -15,6 +15,12 @@ class StockListView(generics.ListAPIView):
     permission_classes = (permissions.AllowAny,)
     serializer_class = StockSummarySerializer
 
+    def paginate_queryset(self, queryset):
+        # Allow client to request full list of all stocks without pagination cap
+        if self.request.query_params.get("all", "").lower() in ("true", "1", "yes") or self.request.query_params.get("limit") == "-1":
+            return None
+        return super().paginate_queryset(queryset)
+
     def get_queryset(self):
         StockService.ensure_directory_initialized()
         qs = Stock.objects.filter(is_active=True)

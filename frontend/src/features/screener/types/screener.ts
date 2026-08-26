@@ -1,10 +1,19 @@
+export type MarketCapCategory = "all" | "large" | "mid" | "small";
+export type PeCategory = "all" | "value" | "fair" | "growth";
+export type PricePerformance = "all" | "gainers" | "losers" | "big_gainers";
+export type ForecastTrend = "all" | "bullish" | "bearish";
+
 export interface ScreenerFilters {
+  search: string;
   sector: string;
+  marketCapCategory: MarketCapCategory;
   minMarketCap: number; // in Cr
+  peCategory: PeCategory;
+  pricePerformance: PricePerformance;
   minRsi: number;
   maxRsi: number;
-  forecastTrend: "all" | "bullish" | "bearish";
-  search: string;
+  forecastTrend: ForecastTrend;
+  minForecastProb: number;
 }
 
 export interface ScreenerStockItem {
