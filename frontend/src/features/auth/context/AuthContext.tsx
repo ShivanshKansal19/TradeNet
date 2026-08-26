@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode, type FC } from "react";
-import type { User, LoginCredentials, RegisterCredentials } from "../types/auth";
+import type { User, LoginCredentials, RegisterCredentials, UpdateProfileData } from "../types/auth";
 import { authService, authStorage } from "../services/authService";
 
 interface AuthContextType {
@@ -10,6 +10,7 @@ interface AuthContextType {
   register: (credentials: RegisterCredentials) => Promise<void>;
   logout: () => void;
   refreshProfile: () => Promise<void>;
+  updateProfile: (data: UpdateProfileData) => Promise<User>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -74,6 +75,12 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     }
   };
 
+  const updateProfile = async (data: UpdateProfileData): Promise<User> => {
+    const updated = await authService.updateProfile(data);
+    setUser(updated);
+    return updated;
+  };
+
   const logout = () => {
     authService.logout();
     setUser(null);
@@ -89,12 +96,14 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         register,
         logout,
         refreshProfile,
+        updateProfile,
       }}
     >
       {children}
     </AuthContext.Provider>
   );
 };
+
 
 export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);

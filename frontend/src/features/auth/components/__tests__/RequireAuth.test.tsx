@@ -18,6 +18,7 @@ describe("RequireAuth Guard Component", () => {
       register: vi.fn(),
       logout: vi.fn(),
       refreshProfile: vi.fn(),
+      updateProfile: vi.fn(),
     });
 
     render(
@@ -44,6 +45,7 @@ describe("RequireAuth Guard Component", () => {
       register: vi.fn(),
       logout: vi.fn(),
       refreshProfile: vi.fn(),
+      updateProfile: vi.fn(),
     });
 
     render(
@@ -75,7 +77,9 @@ describe("RequireAuth Guard Component", () => {
       register: vi.fn(),
       logout: vi.fn(),
       refreshProfile: vi.fn(),
+      updateProfile: vi.fn(),
     });
+
 
     render(
       <MemoryRouter initialEntries={["/portfolio"]}>
