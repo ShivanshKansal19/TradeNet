@@ -1,3 +1,38 @@
+# Python & Virtual Environments
+.venv/
 venv/
+ENV/
+env/
+*.py[cod]
 __pycache__/
-*.pyc
+*.so
+.pytest_cache/
+
+# Databases & Media
+*.sqlite3
+db.sqlite3
+staticfiles/
+media/
+
+# Node & Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+dist/
+.npm
+npm-debug.log*
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+
+# IDE & Editor Settings
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
