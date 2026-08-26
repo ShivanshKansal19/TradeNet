@@ -1,4 +1,3 @@
-import React from "react";
 import LoginForm from "../features/auth/components/LoginForm";
 import { BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";

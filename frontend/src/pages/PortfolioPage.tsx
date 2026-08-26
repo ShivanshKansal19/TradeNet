@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Briefcase, Plus } from "lucide-react";
 import {
   PortfolioOverviewCards,

@@ -1,6 +1,7 @@
 import apiClient from "../../../api/client";
 import { API_ENDPOINTS } from "../../../api/endpoints";
 import type { Stock, StockSearchResult, TechnicalIndicatorsData } from "../types/stock";
+export type { Stock, StockSearchResult, TechnicalIndicatorsData };
 import { MOCK_STOCKS, MOCK_SEARCH_RESULTS, MOCK_TECHNICALS } from "../mocks/stocks";
 
 const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === "true";

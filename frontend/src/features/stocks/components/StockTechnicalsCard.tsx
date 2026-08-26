@@ -1,6 +1,4 @@
-import React from "react";
 import type { TechnicalIndicatorsData } from "../types/stock";
-import { Activity, Gauge, TrendingUp, TrendingDown } from "lucide-react";
 
 interface Props {
   technicals?: TechnicalIndicatorsData;

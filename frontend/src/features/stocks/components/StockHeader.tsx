@@ -1,6 +1,5 @@
-import React from "react";
 import { Link } from "react-router-dom";
-import { Plus, GitCompare, Bookmark, TrendingUp, TrendingDown } from "lucide-react";
+import { GitCompare, Bookmark, TrendingUp, TrendingDown } from "lucide-react";
 import type { Stock } from "../types/stock";
 
 interface Props {

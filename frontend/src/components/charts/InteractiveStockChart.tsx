@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { TrendingUp, TrendingDown, Loader2 } from "lucide-react";
 import { useStockPriceHistory } from "../../features/stocks";
 

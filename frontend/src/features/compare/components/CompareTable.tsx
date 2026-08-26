@@ -1,6 +1,5 @@
-import React from "react";
 import type { CompareStockData } from "../types/compare";
-import { TrendingUp, TrendingDown, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 interface Props {
   data: CompareStockData[];

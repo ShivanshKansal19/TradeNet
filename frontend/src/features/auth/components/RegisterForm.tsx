@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Lock, User as UserIcon, Mail, Eye, EyeOff, Loader2, ArrowRight, Sparkles } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
@@ -19,7 +19,7 @@ export default function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!username.trim() || !password.trim() || !passwordConfirm.trim()) {
       setError("Please fill in all required fields.");

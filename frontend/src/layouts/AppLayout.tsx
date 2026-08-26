@@ -4,15 +4,17 @@ import {
   Bell,
   BarChart3,
   Briefcase,
-  ChevronDown,
   GitCompare,
   LayoutDashboard,
   ListFilter,
+  LogIn,
   Menu,
   Star,
+  User as UserIcon,
 } from "lucide-react";
 import { useState } from "react";
 import { StockSearchBar } from "../features/stocks";
+import { useAuth } from "../features/auth";
 
 const navigation = [
   {
@@ -45,6 +47,7 @@ const navigation = [
 export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const location = useLocation();
+  const { user, isAuthenticated } = useAuth();
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 antialiased selection:bg-emerald-500 selection:text-white">
@@ -91,18 +94,36 @@ export default function AppLayout() {
 
         {/* User Account Footer */}
         <div className="border-t border-zinc-800/80 p-3">
-          <div className="flex w-full items-center gap-3 rounded-xl p-2.5 text-left bg-zinc-900/40 border border-zinc-800/60">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold">
-              TN
-            </div>
-            <div className="flex-1 overflow-hidden">
-              <p className="truncate text-xs font-bold text-zinc-200">Trader Workspace</p>
-              <p className="truncate text-[10px] text-zinc-500">Live Indian Markets</p>
-            </div>
-            <ChevronDown size={14} className="text-zinc-500" />
-          </div>
+          {isAuthenticated && user ? (
+            <Link
+              to="/profile"
+              className="flex w-full items-center gap-3 rounded-xl p-2.5 text-left bg-zinc-900/40 border border-zinc-800/60 hover:border-emerald-500/30 transition group"
+            >
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold">
+                {user.username.slice(0, 2).toUpperCase()}
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <p className="truncate text-xs font-bold text-zinc-200 group-hover:text-white transition">
+                  {user.username}
+                </p>
+                <p className="truncate text-[10px] text-zinc-500">
+                  {user.email || "Active Trader"}
+                </p>
+              </div>
+              <UserIcon size={14} className="text-zinc-500 group-hover:text-emerald-400 transition" />
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-2.5 text-xs font-bold text-emerald-400 hover:bg-emerald-500 hover:text-zinc-950 transition shadow-sm"
+            >
+              <LogIn size={15} />
+              Sign In
+            </Link>
+          )}
         </div>
       </aside>
+
 
       {/* Main Container */}
       <div className={`transition-all duration-200 ${sidebarOpen ? "ml-64" : "ml-0"}`}>

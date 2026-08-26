@@ -1,4 +1,3 @@
-import React from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useStockDetails, useStockTechnicals, StockHeader, StockFundamentalsCard, StockTechnicalsCard } from "../features/stocks";

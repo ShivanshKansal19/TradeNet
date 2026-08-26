@@ -1,5 +1,3 @@
-import React from "react";
-
 export interface AllocationItem {
   label: string;
   value: number; // percentage or currency amount

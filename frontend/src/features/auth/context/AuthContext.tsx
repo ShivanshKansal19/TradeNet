@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { User, LoginCredentials, RegisterCredentials } from "../types/auth";
+import { createContext, useContext, useEffect, useState, useCallback, type ReactNode, type FC } from "react";
+import type { User, LoginCredentials, RegisterCredentials } from "../types/auth";
 import { authService, authStorage } from "../services/authService";
 
 interface AuthContextType {
@@ -14,7 +14,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -38,6 +38,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     refreshProfile();
+
+    const handleSessionExpiredEvent = () => {
+      setUser(null);
+      setIsLoading(false);
+    };
+
+    window.addEventListener("tradenet:auth:session-expired", handleSessionExpiredEvent);
+    return () => {
+      window.removeEventListener("tradenet:auth:session-expired", handleSessionExpiredEvent);
+    };
   }, [refreshProfile]);
 
   const login = async (credentials: LoginCredentials) => {

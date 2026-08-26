@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, TrendingUp, TrendingDown, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { useStockSearch } from "../hooks/useStockSearch";
 
 interface Props {

@@ -1,4 +1,4 @@
-import type { WatchlistGroup, WatchlistItem, StockAlert } from "../types/watchlist";
+import type { WatchlistGroup, StockAlert } from "../types/watchlist";
 
 const STORAGE_KEY = "tradenet_watchlists";
 const ALERTS_KEY = "tradenet_alerts";

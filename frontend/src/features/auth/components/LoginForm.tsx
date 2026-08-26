@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Lock, User as UserIcon, Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
@@ -15,7 +15,7 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) {
       setError("Please enter both username and password.");
@@ -37,6 +37,8 @@ export default function LoginForm() {
     }
   };
 
+  const reason = searchParams.get("reason");
+
   return (
     <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900/80 p-8 shadow-2xl backdrop-blur-xl">
       <div className="mb-6 text-center">
@@ -45,6 +47,12 @@ export default function LoginForm() {
           Sign in to access your portfolios, holdings, and watchlists
         </p>
       </div>
+
+      {reason === "expired" && !error && (
+        <div className="mb-5 flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-300">
+          <span className="font-semibold">Session expired:</span> Please sign in again to continue.
+        </div>
+      )}
 
       {error && (
         <div className="mb-5 rounded-xl border border-rose-500/20 bg-rose-500/10 p-3.5 text-xs text-rose-400">

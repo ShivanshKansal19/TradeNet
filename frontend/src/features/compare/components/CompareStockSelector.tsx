@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Plus, X, Search, Loader2 } from "lucide-react";
 import { searchStocks, type StockSearchResult } from "../../stocks/services/stockService";
 

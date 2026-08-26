@@ -1,5 +1,4 @@
-import React from "react";
-import { CheckCircle2, Award, History } from "lucide-react";
+import { Award } from "lucide-react";
 import type { ValidationMetrics } from "../types/forecast";
 
 interface Props {

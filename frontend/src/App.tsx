@@ -7,8 +7,10 @@ import ComparePage from "./pages/ComparePage";
 import ScreenerPage from "./pages/ScreenerPage";
 import WatchlistPage from "./pages/WatchlistPage";
 import PortfolioPage from "./pages/PortfolioPage";
+import ProfilePage from "./pages/ProfilePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import { RequireAuth } from "./features/auth";
 
 export default function App() {
   return (
@@ -16,15 +18,23 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route element={<AppLayout />}>
+        {/* Public Routes */}
         <Route path="/" element={<Dashboard />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/stocks/:symbol" element={<StockDetailPage />} />
         <Route path="/compare" element={<ComparePage />} />
         <Route path="/screener" element={<ScreenerPage />} />
-        <Route path="/watchlist" element={<WatchlistPage />} />
-        <Route path="/portfolio" element={<PortfolioPage />} />
+
+        {/* Protected Routes */}
+        <Route element={<RequireAuth />}>
+          <Route path="/watchlist" element={<WatchlistPage />} />
+          <Route path="/portfolio" element={<PortfolioPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+        </Route>
+
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
     </Routes>
   );
 }
+

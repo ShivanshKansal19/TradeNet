@@ -1,4 +1,3 @@
-import React from "react";
 import { TrendingUp, TrendingDown, Wallet, DollarSign, PieChart } from "lucide-react";
 import type { PortfolioSummary } from "../types/portfolio";
 

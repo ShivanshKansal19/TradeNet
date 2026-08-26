@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Sparkles, TrendingUp, TrendingDown, Target, ShieldCheck } from "lucide-react";
+import { useState } from "react";
+import { Sparkles, TrendingUp, TrendingDown } from "lucide-react";
 import type { HorizonDays } from "../types/forecast";
 import { useStockForecast } from "../hooks/useStockForecast";
 import ValidationScoreBadge from "./ValidationScoreBadge";
@@ -12,7 +12,7 @@ interface Props {
 
 export default function ForecastCard({ symbol, currentPrice }: Props) {
   const [horizon, setHorizon] = useState<HorizonDays>(5);
-  const { data: forecast, isLoading } = useStockForecast(symbol, horizon, currentPrice);
+  const { data: forecast } = useStockForecast(symbol, horizon, currentPrice);
 
   const horizons: { label: string; value: HorizonDays }[] = [
     { label: "1 Trading Day", value: 1 },

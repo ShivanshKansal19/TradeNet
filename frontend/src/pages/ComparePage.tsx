@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { GitCompare, Loader2 } from "lucide-react";
 import { CompareStockSelector, CompareTable, fetchComparisonData, type CompareStockData } from "../features/compare";

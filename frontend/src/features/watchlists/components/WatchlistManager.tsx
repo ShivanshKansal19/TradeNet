@@ -1,9 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Bell, Trash2, TrendingUp, TrendingDown, Sparkles, FolderPlus } from "lucide-react";
-import type { WatchlistGroup, WatchlistItem } from "../types/watchlist";
-import { StockSearchBar } from "../../stocks";
-import { getStockDetails } from "../../stocks/services/stockService";
+import { Bell, Trash2, Sparkles, FolderPlus } from "lucide-react";
+import type { WatchlistGroup } from "../types/watchlist";
 
 interface Props {
   groups: WatchlistGroup[];

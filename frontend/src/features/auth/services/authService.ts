@@ -1,5 +1,5 @@
 import apiClient from "../../../api/client";
-import { AuthResponse, AuthTokens, LoginCredentials, RegisterCredentials, User } from "../types/auth";
+import type { AuthResponse, AuthTokens, LoginCredentials, RegisterCredentials, User } from "../types/auth";
 
 const ACCESS_TOKEN_KEY = "tradenet_access_token";
 const REFRESH_TOKEN_KEY = "tradenet_refresh_token";
@@ -37,9 +37,7 @@ export const authService = {
   },
 
   async getProfile(): Promise<User> {
-    const token = authStorage.getAccessToken();
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const response = await apiClient.get<User>("/api/v1/auth/profile/", { headers });
+    const response = await apiClient.get<User>("/api/v1/auth/profile/");
     return response.data;
   },
 

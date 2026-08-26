@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Layers } from "lucide-react";
 import {
@@ -21,7 +21,7 @@ const sectors = [
 
 export default function Dashboard() {
   const { data, isLoading, isError } = useMarketOverview();
-  const [indexCategory, setIndexCategory] = React.useState<"major" | "sectoral" | "broad">("major");
+  const [indexCategory, setIndexCategory] = useState<"all" | "major" | "sectoral" | "broad">("major");
 
   if (isLoading) {
     return <MarketDashboardSkeleton />;

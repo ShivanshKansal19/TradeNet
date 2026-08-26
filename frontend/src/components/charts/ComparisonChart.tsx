@@ -1,5 +1,3 @@
-import React, { useState } from "react";
-
 export interface StockSeries {
   symbol: string;
   name: string;
@@ -15,10 +13,8 @@ interface Props {
 
 export default function ComparisonChart({
   series = [],
-  labels = [],
   height = 280,
 }: Props) {
-  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   if (series.length === 0) {
     return (

@@ -1,5 +1,4 @@
-import React from "react";
-import { TrendingUp, Award, BarChart2 } from "lucide-react";
+import { BarChart2 } from "lucide-react";
 
 interface Props {
   portfolioReturnPct: number;
