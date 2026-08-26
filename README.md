@@ -23,7 +23,7 @@ Comprehensive architectural and system design documentation is available in the 
 ## 🛠️ Tech Stack
 
 - **Backend:** Python, Django, Django REST Framework, Celery, Redis
-- **ML / Quant Engine:** Prophet, Pandas, NumPy, Scikit-Learn
+- **ML / Quant Engine:** Quantile Ensemble (Scikit-Learn), Pandas, NumPy
 - **Frontend:** React, TypeScript, Vite, Tailwind CSS, TanStack Query, React Router
 - **Database:** PostgreSQL / SQLite
 - **Deployment:** Render, Gunicorn, WhiteNoise

@@ -5,20 +5,40 @@ interface Props {
   stock: Stock;
 }
 
+export function formatMarketCap(mcap?: number): string {
+  if (!mcap || mcap <= 0) return "N/A";
+  
+  if (mcap >= 1e12) {
+    return `₹${(mcap / 1e12).toFixed(2)} Lakh Cr`;
+  } else if (mcap >= 1e7) {
+    return `₹${(mcap / 1e7).toLocaleString("en-IN", { maximumFractionDigits: 0 })} Cr`;
+  } else if (mcap >= 1e5) {
+    return `₹${(mcap / 1e5).toFixed(2)} Lakh Cr`;
+  } else if (mcap > 0) {
+    return `₹${mcap.toLocaleString("en-IN")} Cr`;
+  }
+  return "N/A";
+}
+
 export default function StockFundamentalsCard({ stock }: Props) {
-  const price = stock.price ?? 1000;
-  const dayHigh = stock.day_high ?? (price * 1.015);
-  const dayLow = stock.day_low ?? (price * 0.985);
+  const price = stock.price ?? 0;
+  const dayHigh = stock.day_high || (price > 0 ? price * 1.01 : 0);
+  const dayLow = stock.day_low || (price > 0 ? price * 0.99 : 0);
+
+  // Normalize dividend yield percentage
+  const divYieldStr = stock.dividend_yield
+    ? `${(stock.dividend_yield < 1 ? stock.dividend_yield * 100 : stock.dividend_yield).toFixed(2)}%`
+    : "0.00%";
 
   const metrics = [
-    { label: "Market Cap", value: stock.market_cap ? `₹${(stock.market_cap / 1000).toFixed(2)} Lakh Cr` : "₹4.50 Lakh Cr" },
-    { label: "P/E Ratio (TTM)", value: stock.pe_ratio ? stock.pe_ratio.toFixed(2) : "22.40" },
-    { label: "P/B Ratio", value: stock.pb_ratio ? stock.pb_ratio.toFixed(2) : "3.20" },
-    { label: "EPS (TTM)", value: stock.eps ? `₹${stock.eps.toFixed(2)}` : "₹58.40" },
-    { label: "Dividend Yield", value: stock.dividend_yield ? `${stock.dividend_yield.toFixed(2)}%` : "1.20%" },
-    { label: "Day's High", value: `₹${dayHigh.toFixed(2)}` },
-    { label: "Day's Low", value: `₹${dayLow.toFixed(2)}` },
-    { label: "Volume (Today)", value: (stock.volume || 12500000).toLocaleString("en-IN") },
+    { label: "Market Cap", value: formatMarketCap(stock.market_cap) },
+    { label: "P/E Ratio (TTM)", value: stock.pe_ratio ? stock.pe_ratio.toFixed(2) : "N/A" },
+    { label: "P/B Ratio", value: stock.pb_ratio ? stock.pb_ratio.toFixed(2) : "N/A" },
+    { label: "EPS (TTM)", value: stock.eps ? `₹${stock.eps.toFixed(2)}` : "N/A" },
+    { label: "Dividend Yield", value: divYieldStr },
+    { label: "Day's High", value: dayHigh > 0 ? `₹${dayHigh.toFixed(2)}` : "N/A" },
+    { label: "Day's Low", value: dayLow > 0 ? `₹${dayLow.toFixed(2)}` : "N/A" },
+    { label: "Volume (Today)", value: stock.volume ? stock.volume.toLocaleString("en-IN") : "N/A" },
   ];
 
   return (

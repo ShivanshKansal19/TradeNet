@@ -60,14 +60,17 @@ class YFinanceProvider(AbstractMarketDataProvider):
                 
             prev_close = getattr(info, "previous_close", None) or last_price
             
-            day_change = (last_price - prev_close) if last_price and prev_close else 0.0
-            day_change_percent = (day_change / prev_close * 100) if prev_close else 0.0
+            volume = getattr(info, "last_volume", None) or getattr(info, "volume", None)
+            if not volume:
+                t_info = ticker.info or {}
+                volume = t_info.get("regularMarketVolume") or t_info.get("volume") or t_info.get("averageVolume")
 
             return {
                 "symbol": symbol.replace(".NS", "").replace(".BO", ""),
                 "current_price": float(last_price) if last_price else None,
                 "day_change": float(day_change),
                 "day_change_percent": float(day_change_percent),
+                "volume": int(volume) if volume else None,
                 "market_cap": getattr(info, "market_cap", None),
                 "week_52_high": getattr(info, "year_high", None),
                 "week_52_low": getattr(info, "year_low", None),

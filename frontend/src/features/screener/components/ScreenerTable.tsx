@@ -100,10 +100,19 @@ export default function ScreenerTable({ stocks }: Props) {
                 </td>
 
                 {/* Market Cap */}
-                <td className="py-3.5 font-medium text-zinc-300">₹{((s.market_cap || 50000) / 1000).toFixed(2)}L Cr</td>
+                <td className="py-3.5 font-medium text-zinc-300">
+                  {(() => {
+                    const mcap = s.market_cap;
+                    if (!mcap || mcap <= 0) return "N/A";
+                    if (mcap >= 1e12) return `₹${(mcap / 1e12).toFixed(2)}L Cr`;
+                    if (mcap >= 1e7) return `₹${(mcap / 1e7).toLocaleString("en-IN", { maximumFractionDigits: 0 })} Cr`;
+                    if (mcap >= 1e5) return `₹${(mcap / 1e5).toFixed(2)}L Cr`;
+                    return `₹${mcap.toLocaleString("en-IN")} Cr`;
+                  })()}
+                </td>
 
                 {/* P/E */}
-                <td className="py-3.5 font-medium text-zinc-300">{(s.pe_ratio ?? 22.4).toFixed(1)}</td>
+                <td className="py-3.5 font-medium text-zinc-300">{s.pe_ratio ? Number(s.pe_ratio).toFixed(1) : "N/A"}</td>
 
                 {/* RSI */}
                 <td className="py-3.5">

@@ -19,7 +19,7 @@ export function generateMockForecast(symbol: string, horizon: HorizonDays = 5, c
     probability_positive: prob,
     confidence_label: prob >= 60 ? "High" : "Medium",
     validation: {
-      model_version: "v1.2-walkforward-prophet",
+      model_version: "v2.1-walkforward-ensemble",
       feature_version: "fe-v2.0",
       baseline_mae: 14.8,
       model_mae: 11.2,

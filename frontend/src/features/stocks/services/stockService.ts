@@ -50,7 +50,7 @@ export function normalizeStockData(data: any, sym: string): Stock {
     day_low: Number(data.day_low ?? (currentPrice > 0 ? currentPrice * 0.99 : 0)),
     year_high: yHigh,
     year_low: yLow,
-    volume: Number(data.volume ?? 0),
+    volume: Number(data.volume ?? data.latest_price?.volume ?? 0),
     market_cap: Number(data.market_cap ?? fundamentals.market_cap ?? 0),
     pe_ratio: Number(fundamentals.pe_ratio ?? data.pe_ratio ?? 0),
     pb_ratio: Number(fundamentals.pb_ratio ?? data.pb_ratio ?? 0),

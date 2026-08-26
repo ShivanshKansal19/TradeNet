@@ -59,11 +59,21 @@ export default function CompareTable({ data }: Props) {
           {/* Market Cap */}
           <tr>
             <td className="py-3.5 font-medium text-zinc-400">Market Cap</td>
-            {data.map((item) => (
-              <td key={item.stock.symbol} className="py-3.5 font-semibold text-zinc-200">
-                ₹{((item.stock.market_cap || 500000) / 1000).toFixed(2)} Lakh Cr
-              </td>
-            ))}
+            {data.map((item) => {
+              const mcap = item.stock.market_cap;
+              let mcapStr = "N/A";
+              if (mcap && mcap > 0) {
+                if (mcap >= 1e12) mcapStr = `₹${(mcap / 1e12).toFixed(2)} Lakh Cr`;
+                else if (mcap >= 1e7) mcapStr = `₹${(mcap / 1e7).toLocaleString("en-IN", { maximumFractionDigits: 0 })} Cr`;
+                else if (mcap >= 1e5) mcapStr = `₹${(mcap / 1e5).toFixed(2)} Lakh Cr`;
+                else mcapStr = `₹${mcap.toLocaleString("en-IN")} Cr`;
+              }
+              return (
+                <td key={item.stock.symbol} className="py-3.5 font-semibold text-zinc-200">
+                  {mcapStr}
+                </td>
+              );
+            })}
           </tr>
 
           {/* Valuation P/E */}
@@ -71,7 +81,7 @@ export default function CompareTable({ data }: Props) {
             <td className="py-3.5 font-medium text-zinc-400">P/E Ratio (TTM)</td>
             {data.map((item) => (
               <td key={item.stock.symbol} className="py-3.5 font-semibold text-zinc-200">
-                {item.stock.pe_ratio ? Number(item.stock.pe_ratio).toFixed(2) : "24.50"}
+                {item.stock.pe_ratio ? Number(item.stock.pe_ratio).toFixed(2) : "N/A"}
               </td>
             ))}
           </tr>
@@ -79,11 +89,15 @@ export default function CompareTable({ data }: Props) {
           {/* Dividend Yield */}
           <tr>
             <td className="py-3.5 font-medium text-zinc-400">Dividend Yield</td>
-            {data.map((item) => (
-              <td key={item.stock.symbol} className="py-3.5 font-semibold text-zinc-200">
-                {item.stock.dividend_yield ? `${Number(item.stock.dividend_yield).toFixed(2)}%` : "1.20%"}
-              </td>
-            ))}
+            {data.map((item) => {
+              const dy = item.stock.dividend_yield;
+              const dyStr = dy ? `${(dy < 1 ? dy * 100 : dy).toFixed(2)}%` : "0.00%";
+              return (
+                <td key={item.stock.symbol} className="py-3.5 font-semibold text-zinc-200">
+                  {dyStr}
+                </td>
+              );
+            })}
           </tr>
 
           {/* 5-Day AI Forecast */}

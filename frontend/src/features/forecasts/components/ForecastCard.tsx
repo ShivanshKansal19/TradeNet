@@ -34,7 +34,7 @@ export default function ForecastCard({ symbol, currentPrice }: Props) {
             <h3 className="font-bold text-white flex items-center gap-2">
               Walk-Forward AI Forecast
               <span className="text-[10px] font-semibold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30">
-                PROPHET ML
+                QUANT ENSEMBLE ML
               </span>
             </h3>
             <p className="text-xs text-zinc-400">Multi-horizon probabilistic return models</p>
