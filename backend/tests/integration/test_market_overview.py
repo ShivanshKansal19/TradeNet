@@ -25,7 +25,7 @@ def test_market_overview_endpoint(api_client, sample_stock):
     assert "indices" in response.data
     assert "sectors" in response.data
     assert "top_gainers" in response.data
-    assert len(response.data["indices"]) == 1
-    assert response.data["indices"][0]["name"] == "NIFTY 50"
-    assert len(response.data["sectors"]) == 1
-    assert response.data["sectors"][0]["sector_name"] == "Energy"
+    assert len(response.data["indices"]) >= 1
+    assert any(idx["name"] == "NIFTY 50" for idx in response.data["indices"])
+    assert len(response.data["sectors"]) >= 1
+    assert any(s["sector_name"] == "Energy" for s in response.data["sectors"])

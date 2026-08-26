@@ -7,6 +7,9 @@ env/
 __pycache__/
 *.so
 .pytest_cache/
+pytest-cache-files*/
+backend/pytest-cache-files*/
+.scratch/
 
 # Databases & Media
 *.sqlite3

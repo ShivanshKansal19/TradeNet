@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
+from apps.portfolios.models import Portfolio
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=6)
@@ -22,6 +23,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             first_name=validated_data.get("first_name", ""),
             last_name=validated_data.get("last_name", ""),
             password=validated_data["password"],
+        )
+        # Auto-provision default primary portfolio
+        Portfolio.objects.create(
+            user=user,
+            name="My Portfolio",
+            description="Default primary portfolio",
         )
         return user
 

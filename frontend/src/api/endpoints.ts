@@ -26,4 +26,10 @@ export const API_ENDPOINTS = {
   PORTFOLIOS: {
     LIST: "/api/v1/portfolios/",
   },
+  AUTH: {
+    REGISTER: "/api/v1/auth/register/",
+    LOGIN: "/api/v1/auth/login/",
+    TOKEN_REFRESH: "/api/v1/auth/token/refresh/",
+    PROFILE: "/api/v1/auth/profile/",
+  },
 };

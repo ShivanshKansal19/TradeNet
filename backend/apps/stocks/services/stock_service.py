@@ -1,4 +1,5 @@
 import logging
+import math
 from decimal import Decimal
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
@@ -333,15 +334,22 @@ class StockService:
                     else:
                         d_str = str(date_idx)
 
-                    c = float(row.get("close", 0))
+                    def _safe_num(val, default=0.0):
+                        try:
+                            f = float(val)
+                            return default if (math.isnan(f) or math.isinf(f)) else f
+                        except (TypeError, ValueError):
+                            return default
+
+                    c = _safe_num(row.get("close"), 0.0)
                     results.append({
                         "date": d_str,
-                        "open_price": float(row.get("open", c)),
-                        "high_price": float(row.get("high", c)),
-                        "low_price": float(row.get("low", c)),
+                        "open_price": _safe_num(row.get("open"), c),
+                        "high_price": _safe_num(row.get("high"), c),
+                        "low_price": _safe_num(row.get("low"), c),
                         "close_price": c,
-                        "volume": int(row.get("volume", 0)),
-                        "adjusted_close": float(row.get("adjusted_close", c)),
+                        "volume": int(_safe_num(row.get("volume"), 0)),
+                        "adjusted_close": _safe_num(row.get("adjusted_close"), c),
                     })
                 if results:
                     return results
