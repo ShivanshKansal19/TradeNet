@@ -44,16 +44,18 @@ export default function Dashboard() {
     const sym = idx.symbol.toUpperCase();
     const name = idx.name.toUpperCase();
 
-    if (indexCategory === "major") {
+    if (indexCategory === "all") {
+      return true;
+    } else if (indexCategory === "major") {
       return (
         sym === "^NSEI" ||
         sym === "^BSESN" ||
         sym === "^NSEBANK" ||
         sym === "^CNXIT" ||
-        name.includes("NIFTY 50") ||
-        name.includes("SENSEX") ||
-        name.includes("BANK") ||
-        name.includes("IT")
+        name === "NIFTY 50" ||
+        name === "BSE SENSEX" ||
+        name === "NIFTY BANK" ||
+        name === "NIFTY IT"
       );
     } else if (indexCategory === "sectoral") {
       return (
@@ -70,12 +72,15 @@ export default function Dashboard() {
         name.includes("FMCG") ||
         name.includes("METAL") ||
         name.includes("REALTY") ||
-        name.includes("ENERGY")
+        name.includes("ENERGY") ||
+        name.includes("INFRA") ||
+        name.includes("PSE")
       );
     } else if (indexCategory === "broad") {
       return (
         sym.includes("500") ||
         sym.includes("MDCP") ||
+        sym.includes("SC") ||
         sym.includes("SMCP") ||
         name.includes("500") ||
         name.includes("MIDCAP") ||
@@ -86,8 +91,7 @@ export default function Dashboard() {
     return true;
   });
 
-  // Fallback to top 4 if filtered category is empty
-  const displayIndices = filteredIndices.length > 0 ? filteredIndices : allIndices.slice(0, 4);
+  const displayIndices = filteredIndices.length > 0 ? filteredIndices : allIndices;
 
   return (
     <div className="space-y-8">
@@ -111,16 +115,16 @@ export default function Dashboard() {
 
       {/* Index Cards Section with Category Switcher */}
       <section className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
-            Market Benchmark Indices
+            Market Benchmark Indices ({displayIndices.length})
           </h2>
-          <div className="flex items-center rounded-lg bg-zinc-900/80 p-0.5 border border-zinc-800 text-xs">
+          <div className="flex flex-wrap items-center rounded-xl bg-zinc-900/80 p-1 border border-zinc-800 text-xs">
             <button
               onClick={() => setIndexCategory("major")}
-              className={`px-3 py-1 rounded-md font-medium transition-all ${
+              className={`px-3 py-1 rounded-lg font-medium transition-all ${
                 indexCategory === "major"
-                  ? "bg-zinc-800 text-white shadow-sm"
+                  ? "bg-zinc-800 text-white shadow-sm font-bold"
                   : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
@@ -128,9 +132,9 @@ export default function Dashboard() {
             </button>
             <button
               onClick={() => setIndexCategory("sectoral")}
-              className={`px-3 py-1 rounded-md font-medium transition-all ${
+              className={`px-3 py-1 rounded-lg font-medium transition-all ${
                 indexCategory === "sectoral"
-                  ? "bg-zinc-800 text-white shadow-sm"
+                  ? "bg-zinc-800 text-white shadow-sm font-bold"
                   : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
@@ -138,13 +142,23 @@ export default function Dashboard() {
             </button>
             <button
               onClick={() => setIndexCategory("broad")}
-              className={`px-3 py-1 rounded-md font-medium transition-all ${
+              className={`px-3 py-1 rounded-lg font-medium transition-all ${
                 indexCategory === "broad"
-                  ? "bg-zinc-800 text-white shadow-sm"
+                  ? "bg-zinc-800 text-white shadow-sm font-bold"
                   : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
               Broad / Mid & Small
+            </button>
+            <button
+              onClick={() => setIndexCategory("all")}
+              className={`px-3 py-1 rounded-lg font-medium transition-all ${
+                indexCategory === "all"
+                  ? "bg-zinc-800 text-white shadow-sm font-bold"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              All Indices
             </button>
           </div>
         </div>

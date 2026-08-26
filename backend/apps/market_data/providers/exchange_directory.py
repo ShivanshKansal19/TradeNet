@@ -9,21 +9,21 @@ logger = logging.getLogger(__name__)
 # Complete list of Indian Market & Sectoral Indices
 ALL_MARKET_INDICES = [
     # Broad Benchmark Indices
-    {"symbol": "^NSEI", "name": "NIFTY 50", "category": "Broad Market"},
-    {"symbol": "^BSESN", "name": "BSE SENSEX", "category": "Broad Market"},
-    {"symbol": "^NSEBANK", "name": "NIFTY BANK", "category": "Sectoral"},
-    {"symbol": "^CNXIT", "name": "NIFTY IT", "category": "Sectoral"},
-    {"symbol": "^CNXAUTO", "name": "NIFTY AUTO", "category": "Sectoral"},
-    {"symbol": "^CNXPHARMA", "name": "NIFTY PHARMA", "category": "Sectoral"},
-    {"symbol": "^CNXFMCG", "name": "NIFTY FMCG", "category": "Sectoral"},
-    {"symbol": "^CNXMETAL", "name": "NIFTY METAL", "category": "Sectoral"},
-    {"symbol": "^CNXREALTY", "name": "NIFTY REALTY", "category": "Sectoral"},
-    {"symbol": "^CNXENERGY", "name": "NIFTY ENERGY", "category": "Sectoral"},
-    {"symbol": "^CNXINFRA", "name": "NIFTY INFRA", "category": "Sectoral"},
-    {"symbol": "^CNXPSE", "name": "NIFTY PSE", "category": "Sectoral"},
-    {"symbol": "^CRSLDX", "name": "NIFTY 500", "category": "Broad Market"},
-    {"symbol": "^NSEMDCP50", "name": "NIFTY MIDCAP 50", "category": "Broad Market"},
-    {"symbol": "^NSESMCP", "name": "NIFTY SMALLCAP 100", "category": "Broad Market"},
+    {"symbol": "^NSEI", "name": "NIFTY 50", "category": "Broad Market", "fallback_value": 24820.0},
+    {"symbol": "^BSESN", "name": "BSE SENSEX", "category": "Broad Market", "fallback_value": 81350.0},
+    {"symbol": "^NSEBANK", "name": "NIFTY BANK", "category": "Sectoral", "fallback_value": 51240.0},
+    {"symbol": "^CNXIT", "name": "NIFTY IT", "category": "Sectoral", "fallback_value": 41980.0},
+    {"symbol": "^CNXAUTO", "name": "NIFTY AUTO", "category": "Sectoral", "fallback_value": 25600.0},
+    {"symbol": "^CNXPHARMA", "name": "NIFTY PHARMA", "category": "Sectoral", "fallback_value": 22450.0},
+    {"symbol": "^CNXFMCG", "name": "NIFTY FMCG", "category": "Sectoral", "fallback_value": 61200.0},
+    {"symbol": "^CNXMETAL", "name": "NIFTY METAL", "category": "Sectoral", "fallback_value": 9180.0},
+    {"symbol": "^CNXREALTY", "name": "NIFTY REALTY", "category": "Sectoral", "fallback_value": 1045.0},
+    {"symbol": "^CNXENERGY", "name": "NIFTY ENERGY", "category": "Sectoral", "fallback_value": 39800.0},
+    {"symbol": "^CNXINFRA", "name": "NIFTY INFRA", "category": "Sectoral", "fallback_value": 8650.0},
+    {"symbol": "^CNXPSE", "name": "NIFTY PSE", "category": "Sectoral", "fallback_value": 9480.0},
+    {"symbol": "^CRSLDX", "name": "NIFTY 500", "category": "Broad Market", "fallback_value": 23150.0},
+    {"symbol": "^NSEMDCP50", "name": "NIFTY MIDCAP 50", "category": "Broad Market", "fallback_value": 15820.0},
+    {"symbol": "^CNXSC", "name": "NIFTY SMALLCAP 100", "category": "Broad Market", "fallback_value": 18450.0},
 ]
 
 NSE_EQUITIES_URL = "https://archives.nseindia.com/content/equities/EQUITY_L.csv"

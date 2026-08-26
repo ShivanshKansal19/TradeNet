@@ -1,3 +1,5 @@
+import threading
+import logging
 from decimal import Decimal
 from django.utils import timezone
 from rest_framework import views, permissions, status
@@ -8,28 +10,53 @@ from .providers.yahoo_finance import YFinanceProvider
 from apps.stocks.models import Stock
 from apps.stocks.serializers import StockSummarySerializer
 
+logger = logging.getLogger(__name__)
+
+_is_syncing_indices = False
+
+def _sync_indices_background():
+    global _is_syncing_indices
+    if _is_syncing_indices:
+        return
+    _is_syncing_indices = True
+    try:
+        from .providers.exchange_directory import ALL_MARKET_INDICES
+        provider = YFinanceProvider()
+        live_indices = provider.fetch_market_indices()
+        for item in live_indices:
+            val = item.get("value") or 24800.0
+            chg = item.get("change") or 0.0
+            chg_pct = item.get("change_percent") or 0.0
+            MarketIndex.objects.update_or_create(
+                symbol=item["symbol"],
+                defaults={
+                    "name": item["name"],
+                    "value": Decimal(str(round(val, 2))),
+                    "change": Decimal(str(round(chg, 2))),
+                    "change_percent": Decimal(str(round(chg_pct, 4))),
+                },
+            )
+    except Exception as e:
+        logger.error(f"Background market index sync error: {e}")
+    finally:
+        _is_syncing_indices = False
+
 class MarketOverviewView(views.APIView):
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request):
-        provider = YFinanceProvider()
-        # Fetch/Sync live market indices
-        try:
-            live_indices = provider.fetch_market_indices()
-            for item in live_indices:
-                MarketIndex.objects.update_or_create(
-                    symbol=item["symbol"],
-                    defaults={
-                        "name": item["name"],
-                        "value": Decimal(str(round(item["value"], 2))),
-                        "change": Decimal(str(round(item["change"], 2))),
-                        "change_percent": Decimal(str(round(item["change_percent"], 4))),
-                    },
-                )
-        except Exception:
-            pass
+        from .providers.exchange_directory import ALL_MARKET_INDICES
+        indices_count = MarketIndex.objects.count()
+        has_placeholders = MarketIndex.objects.filter(change=0, change_percent=0).count() > 5
+        if indices_count < len(ALL_MARKET_INDICES) or has_placeholders:
+            # Sync all indices with live exchange quotes immediately
+            _sync_indices_background()
+        else:
+            latest_idx = MarketIndex.objects.order_by("-last_updated").first()
+            if latest_idx and (timezone.now() - latest_idx.last_updated).total_seconds() > 60:
+                threading.Thread(target=_sync_indices_background, daemon=True).start()
 
-        indices = MarketIndex.objects.all()
+        indices = MarketIndex.objects.all().order_by("name")
         sectors = SectorPerformance.objects.all()
         
         # Gainers and Losers

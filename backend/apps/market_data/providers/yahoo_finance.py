@@ -51,19 +51,36 @@ class YFinanceProvider(AbstractMarketDataProvider):
         ticker_sym = self._normalize_symbol(symbol)
         try:
             ticker = yf.Ticker(ticker_sym)
-            info = ticker.fast_info
             
+            # 1. Try fast_info
+            info = ticker.fast_info
             last_price = getattr(info, "last_price", None)
+            prev_close = getattr(info, "previous_close", None)
+            volume = getattr(info, "last_volume", None) or getattr(info, "volume", None)
+
+            # 2. If missing or 0, fallback to recent historical candles (especially accurate for indices)
+            if not last_price or last_price == 0:
+                try:
+                    df = ticker.history(period="5d", interval="1d")
+                    if not df.empty:
+                        last_price = float(df["Close"].iloc[-1])
+                        if len(df) >= 2:
+                            prev_close = float(df["Close"].iloc[-2])
+                        if "Volume" in df.columns:
+                            volume = int(df["Volume"].iloc[-1])
+                except Exception:
+                    pass
+
+            # 3. Fallback to ticker.info dictionary
             if not last_price:
                 t_info = ticker.info or {}
-                last_price = t_info.get("currentPrice") or t_info.get("regularMarketPrice") or getattr(info, "previous_close", None)
-                
-            prev_close = getattr(info, "previous_close", None) or last_price
-            
-            volume = getattr(info, "last_volume", None) or getattr(info, "volume", None)
-            if not volume:
-                t_info = ticker.info or {}
-                volume = t_info.get("regularMarketVolume") or t_info.get("volume") or t_info.get("averageVolume")
+                last_price = t_info.get("regularMarketPrice") or t_info.get("currentPrice") or t_info.get("previousClose")
+                prev_close = prev_close or t_info.get("regularMarketPreviousClose") or t_info.get("previousClose")
+                volume = volume or t_info.get("regularMarketVolume") or t_info.get("volume")
+
+            prev_close = prev_close or last_price
+            day_change = (last_price - prev_close) if last_price and prev_close else 0.0
+            day_change_percent = (day_change / prev_close * 100) if prev_close else 0.0
 
             return {
                 "symbol": symbol.replace(".NS", "").replace(".BO", ""),
@@ -105,21 +122,44 @@ class YFinanceProvider(AbstractMarketDataProvider):
             return {}
 
     def fetch_market_indices(self) -> List[Dict[str, Any]]:
+        from concurrent.futures import ThreadPoolExecutor, as_completed
         from .exchange_directory import ALL_MARKET_INDICES
-        results = []
-        for item in ALL_MARKET_INDICES:
+
+        def fetch_one_index(item):
             sym = item["symbol"]
             name = item["name"]
             quote = self.fetch_quote(sym)
-            val = quote.get("current_price") or (24980.5 if sym == "^NSEI" else 81200.0 if sym == "^BSESN" else 51420.0 if sym == "^NSEBANK" else 42110.0)
+            val = quote.get("current_price") or item.get("fallback_value") or 24800.0
             chg = quote.get("day_change") or 0.0
             chg_pct = quote.get("day_change_percent") or 0.0
-            results.append({
+            return {
                 "symbol": sym,
                 "name": name,
                 "category": item.get("category", "Broad Market"),
                 "value": float(val),
                 "change": float(chg),
                 "change_percent": float(chg_pct),
-            })
+            }
+
+        results = []
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            future_to_item = {executor.submit(fetch_one_index, item): item for item in ALL_MARKET_INDICES}
+            for future in as_completed(future_to_item):
+                try:
+                    res = future.result()
+                    results.append(res)
+                except Exception as e:
+                    item = future_to_item[future]
+                    results.append({
+                        "symbol": item["symbol"],
+                        "name": item["name"],
+                        "category": item.get("category", "Broad Market"),
+                        "value": float(item.get("fallback_value", 24800.0)),
+                        "change": 0.0,
+                        "change_percent": 0.0,
+                    })
+
+        # Preserve order of ALL_MARKET_INDICES
+        order_map = {item["symbol"]: idx for idx, item in enumerate(ALL_MARKET_INDICES)}
+        results.sort(key=lambda x: order_map.get(x["symbol"], 999))
         return results
