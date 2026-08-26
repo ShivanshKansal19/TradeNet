@@ -281,24 +281,78 @@ class StockService:
             logger.error(f"Failed live data sync for {clean_symbol}: {e}")
             return existing_stock
 
-    @staticmethod
-    def get_price_history(stock: Stock, time_range: str = "1y") -> List[StockPrice]:
-        now = timezone.now().date()
-        range_map = {
-            "1d": now - timedelta(days=2),
-            "1w": now - timedelta(days=7),
-            "1m": now - timedelta(days=30),
-            "3m": now - timedelta(days=90),
-            "6m": now - timedelta(days=180),
-            "1y": now - timedelta(days=365),
-            "5y": now - timedelta(days=365 * 5),
-            "all": None,
+    @classmethod
+    def get_price_history(cls, stock: Stock, time_range: str = "1y") -> List[Dict[str, Any]]:
+        clean_range = time_range.lower()
+        provider = cls.provider
+        period_map = {
+            "1d": ("1d", "5m"),
+            "1w": ("5d", "15m"),
+            "1m": ("1mo", "1d"),
+            "3m": ("3mo", "1d"),
+            "6m": ("6mo", "1d"),
+            "1y": ("1y", "1d"),
+            "5y": ("5y", "1wk"),
+            "all": ("max", "1mo"),
         }
-        start_date = range_map.get(time_range.lower(), now - timedelta(days=365))
-        qs = stock.prices.all()
-        if start_date:
-            qs = qs.filter(date__gte=start_date)
-        return list(qs.order_by("date"))
+        period, interval = period_map.get(clean_range, ("1y", "1d"))
+
+        # Fetch real historical candles from Yahoo Finance
+        try:
+            df = provider.fetch_historical_ohlcv(stock.symbol, period=period, interval=interval)
+            if not df.empty:
+                results = []
+                for date_idx, row in df.iterrows():
+                    # Format date string nicely for both intraday and daily
+                    if hasattr(date_idx, "strftime"):
+                        if interval in ["5m", "15m"]:
+                            d_str = date_idx.strftime("%Y-%m-%d %H:%M")
+                        else:
+                            d_str = date_idx.strftime("%Y-%m-%d")
+                    else:
+                        d_str = str(date_idx)
+
+                    c = float(row.get("close", 0))
+                    results.append({
+                        "date": d_str,
+                        "open_price": float(row.get("open", c)),
+                        "high_price": float(row.get("high", c)),
+                        "low_price": float(row.get("low", c)),
+                        "close_price": c,
+                        "volume": int(row.get("volume", 0)),
+                        "adjusted_close": float(row.get("adjusted_close", c)),
+                    })
+                if results:
+                    return results
+        except Exception as e:
+            logger.warning(f"Live history fetch failed for {stock.symbol}: {e}")
+
+        # Fallback to local DB prices
+        now = timezone.now().date()
+        range_days_map = {
+            "1d": 2,
+            "1w": 7,
+            "1m": 30,
+            "3m": 90,
+            "6m": 180,
+            "1y": 365,
+            "5y": 1825,
+        }
+        days = range_days_map.get(clean_range, 365)
+        start_date = now - timedelta(days=days)
+        qs = stock.prices.filter(date__gte=start_date).order_by("date")
+        return [
+            {
+                "date": p.date.isoformat(),
+                "open_price": float(p.open_price),
+                "high_price": float(p.high_price),
+                "low_price": float(p.low_price),
+                "close_price": float(p.close_price),
+                "volume": p.volume,
+                "adjusted_close": float(p.adjusted_close or p.close_price),
+            }
+            for p in qs
+        ]
 
     @classmethod
     def search_stocks(cls, query: str, limit: int = 25) -> List[Any]:

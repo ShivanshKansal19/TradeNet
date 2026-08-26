@@ -74,12 +74,11 @@ class StockHistoryView(views.APIView):
             )
         time_range = request.query_params.get("range", "1y")
         history = StockService.get_price_history(stock, time_range=time_range)
-        serializer = StockPriceSerializer(history, many=True)
         return Response({
             "symbol": stock.symbol,
             "range": time_range,
             "count": len(history),
-            "prices": serializer.data,
+            "prices": history,
         })
 
 class StockFundamentalsView(views.APIView):

@@ -6,53 +6,56 @@ import { MOCK_STOCKS, MOCK_SEARCH_RESULTS, MOCK_TECHNICALS } from "../mocks/stoc
 const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === "true";
 
 export function normalizeStockData(data: any, sym: string): Stock {
-  const fallback = MOCK_STOCKS[sym] || {
-    symbol: sym,
-    name: `${sym} India Ltd.`,
-    series: "EQ",
-    isin_number: `INE000${sym}01`,
-    sector: "Diversified",
-    price: 1540.0,
-    change: 12.5,
-    change_percent: 0.82,
-    day_high: 1560.0,
-    day_low: 1525.0,
-    year_high: 1780.0,
-    year_low: 1200.0,
-    volume: 8500000,
-    market_cap: 450000,
-    pe_ratio: 22.4,
-    pb_ratio: 3.5,
-    dividend_yield: 1.1,
-    eps: 68.7,
-  };
-
-  if (!data) return fallback;
+  if (!data) {
+    return {
+      symbol: sym,
+      name: `${sym} Limited`,
+      series: "EQ",
+      isin_number: `INE000${sym}01`,
+      sector: "Diversified",
+      price: 0,
+      change: 0,
+      change_percent: 0,
+      day_high: 0,
+      day_low: 0,
+      year_high: 0,
+      year_low: 0,
+      volume: 0,
+      market_cap: 0,
+      pe_ratio: 0,
+      pb_ratio: 0,
+      dividend_yield: 0,
+      eps: 0,
+    };
+  }
 
   const fundamentals = data.fundamentals || {};
-  const currentPrice = Number(data.price ?? data.current_price ?? fallback.price);
-  const dayChange = Number(data.change ?? data.day_change ?? fallback.change);
-  const dayChangePct = Number(data.change_percent ?? data.day_change_percent ?? fallback.change_percent);
+  const currentPrice = Number(data.price ?? data.current_price ?? 0);
+  const dayChange = Number(data.change ?? data.day_change ?? 0);
+  const dayChangePct = Number(data.change_percent ?? data.day_change_percent ?? 0);
+
+  const yHigh = Number(fundamentals.week_52_high ?? data.year_high ?? (currentPrice > 0 ? currentPrice * 1.15 : 0));
+  const yLow = Number(fundamentals.week_52_low ?? data.year_low ?? (currentPrice > 0 ? currentPrice * 0.85 : 0));
 
   return {
     symbol: data.symbol || sym,
-    name: data.name || fallback.name,
+    name: data.name || sym,
     series: data.series || "EQ",
-    isin_number: data.isin_number || fallback.isin_number || `INE000${sym}01`,
-    sector: data.sector || fallback.sector || "Diversified",
+    isin_number: data.isin_number || `INE000${sym}01`,
+    sector: data.sector || "Diversified",
     price: currentPrice,
     change: dayChange,
     change_percent: dayChangePct,
-    day_high: Number(data.day_high ?? (currentPrice * 1.015)),
-    day_low: Number(data.day_low ?? (currentPrice * 0.985)),
-    year_high: Number(data.year_high ?? fundamentals.week_52_high ?? (currentPrice * 1.25)),
-    year_low: Number(data.year_low ?? fundamentals.week_52_low ?? (currentPrice * 0.75)),
-    volume: Number(data.volume ?? 8500000),
-    market_cap: Number(data.market_cap ?? fundamentals.market_cap ?? fallback.market_cap ?? 450000),
-    pe_ratio: Number(data.pe_ratio ?? fundamentals.pe_ratio ?? fallback.pe_ratio ?? 22.4),
-    pb_ratio: Number(data.pb_ratio ?? fundamentals.pb_ratio ?? fallback.pb_ratio ?? 3.5),
-    dividend_yield: Number(data.dividend_yield ?? fundamentals.dividend_yield ?? fallback.dividend_yield ?? 1.1),
-    eps: Number(data.eps ?? fundamentals.eps ?? fallback.eps ?? 68.7),
+    day_high: Number(data.day_high ?? (currentPrice > 0 ? currentPrice * 1.01 : 0)),
+    day_low: Number(data.day_low ?? (currentPrice > 0 ? currentPrice * 0.99 : 0)),
+    year_high: yHigh,
+    year_low: yLow,
+    volume: Number(data.volume ?? 0),
+    market_cap: Number(data.market_cap ?? fundamentals.market_cap ?? 0),
+    pe_ratio: Number(fundamentals.pe_ratio ?? data.pe_ratio ?? 0),
+    pb_ratio: Number(fundamentals.pb_ratio ?? data.pb_ratio ?? 0),
+    dividend_yield: Number(fundamentals.dividend_yield ?? data.dividend_yield ?? 0),
+    eps: Number(fundamentals.eps ?? data.eps ?? 0),
   };
 }
 
@@ -151,4 +154,34 @@ export async function getStockTechnicals(symbol: string): Promise<TechnicalIndic
   } catch {
     return fallback;
   }
+}
+
+export async function getStockPriceHistory(
+  symbol: string,
+  range: string = "1y"
+): Promise<{ date: string; open: number; high: number; low: number; close: number; price: number; volume: number }[]> {
+  const sym = symbol.toUpperCase();
+  try {
+    const response = await apiClient.get<any>(
+      `${API_ENDPOINTS.STOCKS.HISTORY(sym)}?range=${range.toLowerCase()}`
+    );
+    const rawList = response.data?.prices || (Array.isArray(response.data) ? response.data : []);
+    if (Array.isArray(rawList) && rawList.length > 0) {
+      return rawList.map((p: any) => {
+        const close = Number(p.close_price ?? p.close ?? p.price ?? 0);
+        return {
+          date: p.date || "",
+          open: Number(p.open_price ?? p.open ?? close),
+          high: Number(p.high_price ?? p.high ?? close),
+          low: Number(p.low_price ?? p.low ?? close),
+          close: close,
+          price: close,
+          volume: Number(p.volume ?? 0),
+        };
+      });
+    }
+  } catch (err) {
+    console.error(`Failed to fetch history for ${sym}:`, err);
+  }
+  return [];
 }

@@ -53,24 +53,28 @@ class YFinanceProvider(AbstractMarketDataProvider):
             ticker = yf.Ticker(ticker_sym)
             info = ticker.fast_info
             
-            last_price = getattr(info, "last_price", None) or getattr(info, "previous_close", None)
+            last_price = getattr(info, "last_price", None)
+            if not last_price:
+                t_info = ticker.info or {}
+                last_price = t_info.get("currentPrice") or t_info.get("regularMarketPrice") or getattr(info, "previous_close", None)
+                
             prev_close = getattr(info, "previous_close", None) or last_price
             
             day_change = (last_price - prev_close) if last_price and prev_close else 0.0
             day_change_percent = (day_change / prev_close * 100) if prev_close else 0.0
 
             return {
-                "symbol": symbol.replace(".NS", ""),
-                "current_price": last_price,
-                "day_change": day_change,
-                "day_change_percent": day_change_percent,
+                "symbol": symbol.replace(".NS", "").replace(".BO", ""),
+                "current_price": float(last_price) if last_price else None,
+                "day_change": float(day_change),
+                "day_change_percent": float(day_change_percent),
                 "market_cap": getattr(info, "market_cap", None),
                 "week_52_high": getattr(info, "year_high", None),
                 "week_52_low": getattr(info, "year_low", None),
             }
         except Exception as e:
             logger.error(f"Error fetching quote for {ticker_sym}: {e}")
-            return {"symbol": symbol.replace(".NS", "")}
+            return {"symbol": symbol.replace(".NS", "").replace(".BO", "")}
 
     def fetch_fundamentals(self, symbol: str) -> Dict[str, Any]:
         import yfinance as yf
