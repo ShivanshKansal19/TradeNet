@@ -3,7 +3,7 @@
 TradeNet is a modern, full-stack stock research and decision-support platform for Indian equities. It provides real-time market data, technical and fundamental indicators, short-horizon walk-forward ML forecasting, watchlists, alerts, comparison tools, and portfolio insights.
 
 ## 🌐 Live Website
-[TradeNet - AI Stock Predictions](https://tradenet.onrender.com)
+[TradeNet - AI Stock Predictions](https://tradenet.shivanshkansal.me)
 
 ## 📚 Documentation
 Comprehensive architectural and system design documentation is available in the [`docs/`](docs/README.md) directory:
